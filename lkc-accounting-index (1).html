@@ -1,0 +1,1723 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="LKC Accounting">
+<meta name="theme-color" content="#0f1923">
+<title>LKC Accounting</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg-deepest:#0a1119;
+  --bg-dark:#0f1923;
+  --bg-card:#14202e;
+  --bg-card2:#1a2a3a;
+  --bg-input:#1f3145;
+  --border:#2a3f55;
+  --border-light:#1e3047;
+  --accent:#1a8c5a;
+  --accent-light:#22a870;
+  --accent-dim:#0e4d32;
+  --gold:#c9a227;
+  --gold-dim:#7a5c0e;
+  --danger:#d94040;
+  --danger-dim:#5c1a1a;
+  --warn:#d97706;
+  --warn-dim:#5c3200;
+  --text-primary:#e8f0f8;
+  --text-secondary:#7a9ab8;
+  --text-muted:#4a6580;
+  --radius:10px;
+  --radius-lg:16px;
+  --shadow:0 4px 24px rgba(0,0,0,0.4);
+  --font:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+  --sidebar:240px;
+  --topbar:56px;
+}
+html,body{height:100%;background:var(--bg-deepest);color:var(--text-primary);font-family:var(--font);font-size:15px;overflow:hidden;}
+
+/* LOCK SCREEN */
+#lock-screen{position:fixed;inset:0;background:var(--bg-deepest);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:28px;}
+.lock-logo{text-align:center;}
+.lock-logo h1{font-size:28px;font-weight:700;letter-spacing:-.5px;color:var(--text-primary);}
+.lock-logo h1 span{color:var(--accent-light);}
+.lock-logo p{font-size:13px;color:var(--text-secondary);margin-top:4px;}
+.lock-badge{width:72px;height:72px;border-radius:50%;background:var(--accent-dim);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 8px;}
+.lock-badge svg{width:32px;height:32px;fill:none;stroke:var(--accent-light);stroke-width:2;}
+.pin-dots{display:flex;gap:14px;margin:8px 0;}
+.pin-dot{width:14px;height:14px;border-radius:50%;background:var(--bg-input);border:2px solid var(--border);transition:all .15s;}
+.pin-dot.filled{background:var(--accent-light);border-color:var(--accent-light);}
+.pin-dot.error{background:var(--danger);border-color:var(--danger);}
+.pin-pad{display:grid;grid-template-columns:repeat(3,72px);gap:10px;}
+.pin-btn{height:72px;border-radius:50%;background:var(--bg-card);border:1.5px solid var(--border);color:var(--text-primary);font-size:22px;font-weight:500;font-family:var(--font);cursor:pointer;transition:all .12s;user-select:none;}
+.pin-btn:hover{background:var(--bg-card2);border-color:var(--accent);}
+.pin-btn:active{transform:scale(.92);}
+.pin-btn.del{font-size:16px;color:var(--text-secondary);}
+.pin-btn.zero{grid-column:2;}
+.pin-error{color:var(--danger);font-size:13px;min-height:20px;text-align:center;}
+.lock-msg{font-size:13px;color:var(--text-secondary);}
+
+/* SETUP SCREEN */
+#setup-screen{position:fixed;inset:0;background:var(--bg-deepest);z-index:9998;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px;}
+.setup-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:32px;width:100%;max-width:440px;}
+.setup-card h2{font-size:20px;font-weight:600;margin-bottom:4px;}
+.setup-card p{font-size:13px;color:var(--text-secondary);margin-bottom:24px;}
+.form-group{display:flex;flex-direction:column;gap:6px;margin-bottom:16px;}
+.form-group label{font-size:12px;font-weight:500;color:var(--text-secondary);letter-spacing:.5px;text-transform:uppercase;}
+.form-group input,.form-group select{background:var(--bg-input);border:1.5px solid var(--border);border-radius:var(--radius);padding:10px 14px;color:var(--text-primary);font-family:var(--font);font-size:14px;outline:none;transition:border-color .15s;width:100%;}
+.form-group input:focus,.form-group select:focus{border-color:var(--accent-light);}
+.form-group select option{background:var(--bg-dark);}
+.btn-primary{background:var(--accent);color:#fff;border:none;border-radius:var(--radius);padding:12px 24px;font-family:var(--font);font-size:15px;font-weight:600;cursor:pointer;width:100%;transition:background .15s;}
+.btn-primary:hover{background:var(--accent-light);}
+.setup-pin-inputs{display:flex;gap:10px;justify-content:center;}
+.setup-pin-inputs input{width:52px;height:52px;text-align:center;font-size:22px;font-weight:600;padding:0;border-radius:50%;}
+
+/* INSTALL GATE */
+#install-screen{position:fixed;inset:0;background:var(--bg-deepest);z-index:9997;display:none;flex-direction:column;align-items:center;justify-content:center;gap:20px;padding:24px;}
+
+/* MAIN LAYOUT */
+#app{display:none;height:100vh;overflow:hidden;}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar);background:var(--bg-dark);border-right:1px solid var(--border);display:flex;flex-direction:column;z-index:100;transition:transform .25s;}
+.sidebar-logo{padding:20px 18px 16px;border-bottom:1px solid var(--border-light);}
+.sidebar-logo h2{font-size:17px;font-weight:700;letter-spacing:-.3px;color:var(--text-primary);}
+.sidebar-logo h2 span{color:var(--accent-light);}
+.sidebar-logo p{font-size:11px;color:var(--text-muted);margin-top:2px;}
+.sidebar-biz{padding:10px 18px;border-bottom:1px solid var(--border-light);}
+.sidebar-biz-name{font-size:12px;font-weight:600;color:var(--gold);letter-spacing:.3px;}
+.sidebar-biz-type{font-size:11px;color:var(--text-muted);}
+.nav-section{padding:12px 10px 4px;font-size:10px;font-weight:600;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 14px;border-radius:8px;margin:1px 8px;cursor:pointer;transition:all .15s;color:var(--text-secondary);font-size:13.5px;position:relative;}
+.nav-item:hover{background:var(--bg-card);color:var(--text-primary);}
+.nav-item.active{background:var(--accent-dim);color:var(--accent-light);}
+.nav-item svg{width:17px;height:17px;flex-shrink:0;}
+.nav-badge{position:absolute;right:10px;background:var(--danger);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;}
+.sidebar-bottom{margin-top:auto;padding:12px 8px;border-top:1px solid var(--border-light);}
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:99;}
+
+.topbar{position:fixed;left:var(--sidebar);right:0;top:0;height:var(--topbar);background:var(--bg-dark);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;z-index:50;}
+.topbar-title{font-size:16px;font-weight:600;flex:1;}
+.topbar-actions{display:flex;gap:8px;align-items:center;}
+.hamburger{display:none;background:none;border:none;cursor:pointer;padding:6px;color:var(--text-secondary);}
+.hamburger svg{width:22px;height:22px;}
+.online-badge{font-size:11px;padding:3px 8px;border-radius:20px;font-weight:500;}
+.online-badge.online{background:rgba(26,140,90,.2);color:var(--accent-light);}
+.online-badge.offline{background:rgba(107,114,128,.15);color:var(--text-muted);}
+
+.main-content{margin-left:var(--sidebar);margin-top:var(--topbar);height:calc(100vh - var(--topbar));overflow-y:auto;padding:24px;}
+.page{display:none;}
+.page.active{display:block;}
+
+/* CARDS & STATS */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px;margin-bottom:24px;}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:18px;position:relative;overflow:hidden;}
+.stat-card::before{content:'';position:absolute;top:0;right:0;width:60px;height:60px;border-radius:0 0 0 100%;opacity:.08;}
+.stat-card.income::before{background:var(--accent-light);}
+.stat-card.expense::before{background:var(--danger);}
+.stat-card.profit::before{background:var(--gold);}
+.stat-card.stock::before{background:#7c6af7;}
+.stat-label{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:.8px;text-transform:uppercase;margin-bottom:8px;}
+.stat-value{font-size:26px;font-weight:700;letter-spacing:-.5px;line-height:1;}
+.stat-value.pos{color:var(--accent-light);}
+.stat-value.neg{color:var(--danger);}
+.stat-value.neutral{color:var(--text-primary);}
+.stat-value.gold{color:var(--gold);}
+.stat-sub{font-size:12px;color:var(--text-muted);margin-top:6px;}
+
+.card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);margin-bottom:20px;}
+.card-header{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid var(--border-light);}
+.card-header h3{font-size:15px;font-weight:600;}
+.card-body{padding:20px;}
+.card-body.no-pad{padding:0;}
+
+/* TABLE */
+.data-table{width:100%;border-collapse:collapse;}
+.data-table th{font-size:11px;font-weight:600;color:var(--text-muted);letter-spacing:.7px;text-transform:uppercase;padding:10px 16px;text-align:left;background:var(--bg-deepest);}
+.data-table td{padding:12px 16px;border-bottom:1px solid var(--border-light);font-size:13.5px;vertical-align:middle;}
+.data-table tr:last-child td{border-bottom:none;}
+.data-table tr:hover td{background:rgba(255,255,255,.02);}
+.data-table .amount{font-family:var(--mono);font-size:13px;}
+.data-table .badge{display:inline-block;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;}
+.badge-income{background:rgba(26,140,90,.15);color:var(--accent-light);}
+.badge-expense{background:rgba(217,64,64,.15);color:#f08080;}
+.badge-paid{background:rgba(26,140,90,.15);color:var(--accent-light);}
+.badge-unpaid{background:rgba(217,119,6,.15);color:#f0a040;}
+.badge-low{background:rgba(217,64,64,.15);color:#f08080;}
+.badge-ok{background:rgba(26,140,90,.15);color:var(--accent-light);}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--radius);font-family:var(--font);font-size:13.5px;font-weight:500;cursor:pointer;border:none;transition:all .14s;}
+.btn-sm{padding:5px 12px;font-size:12.5px;}
+.btn-accent{background:var(--accent);color:#fff;}
+.btn-accent:hover{background:var(--accent-light);}
+.btn-outline{background:transparent;color:var(--text-secondary);border:1.5px solid var(--border);}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent-light);}
+.btn-danger{background:var(--danger-dim);color:#f08080;border:1.5px solid var(--danger);}
+.btn-danger:hover{background:var(--danger);color:#fff;}
+.btn-gold{background:var(--gold-dim);color:var(--gold);border:1.5px solid var(--gold-dim);}
+.btn-gold:hover{background:var(--gold);color:#000;}
+.btn svg{width:15px;height:15px;}
+
+/* MODAL */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:center;justify-content:center;padding:16px;}
+.modal-overlay.open{display:flex;}
+.modal{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);width:100%;max-width:520px;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow);}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid var(--border-light);}
+.modal-header h3{font-size:16px;font-weight:600;}
+.modal-close{background:none;border:none;color:var(--text-muted);cursor:pointer;font-size:20px;line-height:1;padding:4px;}
+.modal-close:hover{color:var(--text-primary);}
+.modal-body{padding:20px;}
+.modal-footer{padding:16px 20px;border-top:1px solid var(--border-light);display:flex;gap:10px;justify-content:flex-end;}
+
+/* FORM */
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.frow.one{grid-template-columns:1fr;}
+.fg{display:flex;flex-direction:column;gap:5px;margin-bottom:14px;}
+.fg label{font-size:11.5px;font-weight:600;color:var(--text-secondary);letter-spacing:.4px;text-transform:uppercase;}
+.fg input,.fg select,.fg textarea{background:var(--bg-input);border:1.5px solid var(--border);border-radius:var(--radius);padding:9px 13px;color:var(--text-primary);font-family:var(--font);font-size:14px;outline:none;transition:border-color .15s;width:100%;}
+.fg input:focus,.fg select:focus,.fg textarea:focus{border-color:var(--accent-light);}
+.fg select option{background:var(--bg-dark);}
+.fg textarea{resize:vertical;min-height:80px;}
+
+/* TOAST */
+#toast-container{position:fixed;bottom:24px;right:24px;z-index:9990;display:flex;flex-direction:column;gap:8px;}
+.toast{background:var(--bg-card2);border:1px solid var(--border);border-radius:var(--radius);padding:12px 18px;font-size:13px;display:flex;align-items:center;gap:10px;animation:slideIn .2s ease;max-width:320px;}
+.toast.success{border-left:3px solid var(--accent-light);}
+.toast.error{border-left:3px solid var(--danger);}
+.toast.warn{border-left:3px solid var(--warn);}
+@keyframes slideIn{from{opacity:0;transform:translateX(20px);}to{opacity:1;transform:translateX(0);}}
+
+/* SEARCH & FILTER BAR */
+.filter-bar{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;}
+.filter-bar input,.filter-bar select{background:var(--bg-input);border:1.5px solid var(--border);border-radius:var(--radius);padding:8px 13px;color:var(--text-primary);font-family:var(--font);font-size:13.5px;outline:none;}
+.filter-bar input:focus,.filter-bar select:focus{border-color:var(--accent-light);}
+.filter-bar input{flex:1;min-width:160px;}
+
+/* INVOICE */
+.invoice-preview{background:#fff;color:#111;border-radius:var(--radius);padding:32px;font-family:var(--font);}
+.invoice-preview *{color:#111;}
+.inv-header{display:flex;justify-content:space-between;margin-bottom:24px;}
+.inv-title{font-size:28px;font-weight:700;letter-spacing:-1px;color:#1a6b4a;}
+.inv-biz{font-size:13px;line-height:1.6;}
+.inv-meta{text-align:right;font-size:13px;line-height:1.8;}
+.inv-table{width:100%;border-collapse:collapse;margin:20px 0;}
+.inv-table th{background:#f1f5f9;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:9px 12px;text-align:left;font-weight:600;}
+.inv-table td{padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:13px;}
+.inv-total-section{display:flex;justify-content:flex-end;margin-top:12px;}
+.inv-totals{width:200px;}
+.inv-totals .row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;}
+.inv-totals .row.grand{font-size:15px;font-weight:700;border-top:2px solid #1a6b4a;margin-top:4px;padding-top:8px;color:#1a6b4a;}
+.inv-footer{margin-top:28px;padding-top:16px;border-top:1px solid #e2e8f0;font-size:12px;color:#666;}
+
+/* STOCK ALERT */
+.stock-alert-bar{background:rgba(217,119,6,.1);border:1px solid rgba(217,119,6,.3);border-radius:var(--radius);padding:12px 16px;display:flex;align-items:center;gap:12px;margin-bottom:20px;}
+.stock-alert-bar svg{width:18px;height:18px;stroke:var(--warn);flex-shrink:0;}
+.stock-alert-text{font-size:13px;color:var(--warn);}
+
+/* PROGRESS BAR */
+.prog-wrap{background:var(--bg-input);border-radius:20px;height:6px;overflow:hidden;}
+.prog-bar{height:100%;border-radius:20px;transition:width .3s;}
+.prog-bar.high{background:var(--accent-light);}
+.prog-bar.mid{background:var(--gold);}
+.prog-bar.low{background:var(--danger);}
+
+/* CHART SIMPLE */
+.chart-bars{display:flex;align-items:flex-end;gap:4px;height:80px;padding-top:8px;}
+.chart-bar{flex:1;border-radius:4px 4px 0 0;min-width:6px;transition:height .4s;}
+.chart-bar.income{background:var(--accent-light);}
+.chart-bar.expense{background:rgba(217,64,64,.5);}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:4px;height:4px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+/* RESPONSIVE */
+@media(max-width:768px){
+  :root{--sidebar:0px;}
+  .sidebar{transform:translateX(-240px);width:240px;}
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-overlay.open{display:block;}
+  .topbar{left:0;}
+  .hamburger{display:flex;}
+  .main-content{margin-left:0;}
+  .frow{grid-template-columns:1fr;}
+  .stat-grid{grid-template-columns:repeat(2,1fr);}
+  .data-table .hide-mobile{display:none;}
+}
+@media(max-width:420px){
+  .stat-grid{grid-template-columns:1fr 1fr;}
+  .stat-value{font-size:20px;}
+  .main-content{padding:14px;}
+  .modal{border-radius:var(--radius) var(--radius) 0 0;margin-top:auto;max-height:85vh;}
+  .modal-overlay{align-items:flex-end;padding:0;}
+}
+
+/* CONFIRM DIALOG */
+.confirm-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.75);z-index:600;align-items:center;justify-content:center;padding:20px;}
+.confirm-overlay.open{display:flex;}
+.confirm-box{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:28px;max-width:360px;width:100%;text-align:center;}
+.confirm-box h3{font-size:17px;font-weight:600;margin-bottom:8px;}
+.confirm-box p{font-size:13.5px;color:var(--text-secondary);margin-bottom:20px;line-height:1.6;}
+.confirm-box .actions{display:flex;gap:10px;justify-content:center;}
+
+/* P&L styles */
+.pl-section{margin-bottom:20px;}
+.pl-row{display:flex;justify-content:space-between;padding:8px 14px;border-bottom:1px solid var(--border-light);font-size:13.5px;}
+.pl-row:last-child{border-bottom:none;}
+.pl-header-row{background:var(--bg-deepest);font-weight:600;font-size:12px;color:var(--text-muted);text-transform:uppercase;letter-spacing:.5px;}
+.pl-total-row{font-weight:700;font-size:14px;background:var(--bg-card2);border-radius:var(--radius);margin-top:4px;}
+</style>
+</head>
+<body>
+
+<!-- INSTALL GATE -->
+<div id="install-screen">
+  <div class="setup-card">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div class="lock-badge" style="margin-bottom:12px;">
+        <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </div>
+      <h2 style="font-size:20px;font-weight:700;">LKC Accounting</h2>
+      <p style="color:var(--text-secondary);font-size:13px;margin-top:4px;">Administrator Setup</p>
+    </div>
+    <p style="font-size:13px;color:var(--text-secondary);margin-bottom:20px;">Enter the administrator password to complete installation and set up this software.</p>
+    <div class="fg">
+      <label>Administrator Password</label>
+      <input type="password" id="install-admin-pass" placeholder="Enter admin password to authorize">
+    </div>
+    <p id="install-error" style="color:var(--danger);font-size:13px;min-height:18px;margin-bottom:12px;"></p>
+    <button class="btn-primary" onclick="verifyInstall()">Authorize & Continue Setup</button>
+  </div>
+</div>
+
+<!-- SETUP SCREEN -->
+<div id="setup-screen">
+  <div class="setup-card">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div class="lock-badge" style="margin-bottom:12px;background:var(--gold-dim);border-color:var(--gold);">
+        <svg viewBox="0 0 24 24" style="stroke:var(--gold)"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      </div>
+      <h2>Business Setup</h2>
+      <p style="color:var(--text-secondary);font-size:13px;margin-top:4px;">Configure your accounting profile</p>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label>Business Name</label>
+        <input type="text" id="s-biz" placeholder="e.g. Kamau Enterprises">
+      </div>
+      <div class="fg">
+        <label>Business Type</label>
+        <select id="s-type">
+          <option>Retail</option>
+          <option>Restaurant</option>
+          <option>Services</option>
+          <option>Manufacturing</option>
+          <option>Wholesale</option>
+          <option>Other</option>
+        </select>
+      </div>
+    </div>
+    <div class="frow">
+      <div class="fg">
+        <label>Currency</label>
+        <select id="s-currency">
+          <option value="KES">KES - Kenyan Shilling</option>
+          <option value="USD">USD - US Dollar</option>
+          <option value="UGX">UGX - Ugandan Shilling</option>
+          <option value="TZS">TZS - Tanzanian Shilling</option>
+          <option value="ZAR">ZAR - South African Rand</option>
+          <option value="GBP">GBP - British Pound</option>
+          <option value="EUR">EUR - Euro</option>
+          <option value="NGN">NGN - Nigerian Naira</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Phone / Email</label>
+        <input type="text" id="s-contact" placeholder="For invoices">
+      </div>
+    </div>
+    <div class="fg">
+      <label>Business Address</label>
+      <input type="text" id="s-address" placeholder="Street, City, Country">
+    </div>
+    <div class="fg" style="margin-bottom:6px;">
+      <label>Set Access PIN (4 digits)</label>
+    </div>
+    <div class="setup-pin-inputs" style="margin-bottom:14px;">
+      <input type="number" maxlength="1" id="p0" class="pin-input-s" min="0" max="9">
+      <input type="number" maxlength="1" id="p1" class="pin-input-s" min="0" max="9">
+      <input type="number" maxlength="1" id="p2" class="pin-input-s" min="0" max="9">
+      <input type="number" maxlength="1" id="p3" class="pin-input-s" min="0" max="9">
+    </div>
+    <p id="setup-error" style="color:var(--danger);font-size:13px;min-height:18px;margin-bottom:10px;"></p>
+    <button class="btn-primary" onclick="completeSetup()">Complete Setup & Launch</button>
+  </div>
+</div>
+
+<!-- LOCK SCREEN -->
+<div id="lock-screen">
+  <div class="lock-logo">
+    <div class="lock-badge">
+      <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+    </div>
+    <h1>LKC <span>Accounting</span></h1>
+    <p id="lock-biz-name">Professional Accounting Software</p>
+  </div>
+  <div class="pin-dots" id="pin-dots">
+    <div class="pin-dot" id="d0"></div>
+    <div class="pin-dot" id="d1"></div>
+    <div class="pin-dot" id="d2"></div>
+    <div class="pin-dot" id="d3"></div>
+  </div>
+  <p class="pin-error" id="pin-error"></p>
+  <div class="pin-pad">
+    <button class="pin-btn" onclick="pinPress(1)">1</button>
+    <button class="pin-btn" onclick="pinPress(2)">2</button>
+    <button class="pin-btn" onclick="pinPress(3)">3</button>
+    <button class="pin-btn" onclick="pinPress(4)">4</button>
+    <button class="pin-btn" onclick="pinPress(5)">5</button>
+    <button class="pin-btn" onclick="pinPress(6)">6</button>
+    <button class="pin-btn" onclick="pinPress(7)">7</button>
+    <button class="pin-btn" onclick="pinPress(8)">8</button>
+    <button class="pin-btn" onclick="pinPress(9)">9</button>
+    <button class="pin-btn zero" onclick="pinPress(0)">0</button>
+    <button class="pin-btn del" onclick="pinDel()">&#9003;</button>
+  </div>
+  <p class="lock-msg" id="lock-msg"></p>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeSidebar()"></div>
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <h2>LKC <span>Accounting</span></h2>
+      <p>v1.0 Professional</p>
+    </div>
+    <div class="sidebar-biz">
+      <div class="sidebar-biz-name" id="sb-biz-name">Business Name</div>
+      <div class="sidebar-biz-type" id="sb-biz-type">Business Type</div>
+    </div>
+    <div style="flex:1;overflow-y:auto;">
+      <div class="nav-section">Overview</div>
+      <div class="nav-item active" onclick="nav('dashboard')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </div>
+      <div class="nav-section">Finance</div>
+      <div class="nav-item" onclick="nav('income')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        Income
+      </div>
+      <div class="nav-item" onclick="nav('expenses')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></svg>
+        Expenses
+      </div>
+      <div class="nav-item" onclick="nav('pl')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        Profit & Loss
+      </div>
+      <div class="nav-section">Operations</div>
+      <div class="nav-item" onclick="nav('invoices')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Invoices
+      </div>
+      <div class="nav-item" id="nav-stock" onclick="nav('stock')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+        Stock / Inventory
+        <span class="nav-badge" id="stock-badge" style="display:none">!</span>
+      </div>
+      <div class="nav-section">Reports</div>
+      <div class="nav-item" onclick="nav('reports')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+        Reports
+      </div>
+      <div class="nav-section">Settings</div>
+      <div class="nav-item" onclick="nav('settings')">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </div>
+    </div>
+    <div class="sidebar-bottom">
+      <div class="nav-item" onclick="lockApp()" style="color:var(--danger);font-size:13px;">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:16px;height:16px;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        Lock App
+      </div>
+    </div>
+  </div>
+
+  <div class="topbar">
+    <button class="hamburger" onclick="toggleSidebar()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <span class="topbar-title" id="topbar-title">Dashboard</span>
+    <div class="topbar-actions">
+      <span class="online-badge" id="online-badge">Checking...</span>
+    </div>
+  </div>
+
+  <div class="main-content">
+
+    <!-- DASHBOARD -->
+    <div class="page active" id="page-dashboard">
+      <div class="stat-grid" id="dash-stats"></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px;" class="chart-grid">
+        <div class="card">
+          <div class="card-header"><h3>Income vs Expenses</h3><span style="font-size:12px;color:var(--text-muted)" id="chart-period">Last 6 months</span></div>
+          <div class="card-body">
+            <div style="display:flex;gap:12px;margin-bottom:8px;">
+              <span style="font-size:12px;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:var(--accent-light);display:inline-block;"></span>Income</span>
+              <span style="font-size:12px;display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:rgba(217,64,64,.5);display:inline-block;"></span>Expense</span>
+            </div>
+            <div class="chart-bars" id="dash-chart"></div>
+            <div style="display:flex;justify-content:space-between;margin-top:4px;" id="dash-chart-labels"></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Low Stock Alerts</h3></div>
+          <div class="card-body no-pad" id="dash-low-stock"></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-header"><h3>Recent Transactions</h3><button class="btn btn-outline btn-sm" onclick="nav('income')">View All</button></div>
+        <div class="card-body no-pad"><table class="data-table" id="dash-recent"></table></div>
+      </div>
+    </div>
+
+    <!-- INCOME -->
+    <div class="page" id="page-income">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2 style="font-size:18px;font-weight:600;">Income Records</h2>
+        <button class="btn btn-accent" onclick="openModal('income-modal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Income
+        </button>
+      </div>
+      <div class="filter-bar">
+        <input type="text" placeholder="Search income..." id="income-search" oninput="renderIncome()">
+        <select id="income-cat-filter" onchange="renderIncome()"><option value="">All Categories</option></select>
+        <input type="month" id="income-month-filter" onchange="renderIncome()">
+      </div>
+      <div class="card">
+        <div class="card-body no-pad">
+          <table class="data-table" id="income-table"></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- EXPENSES -->
+    <div class="page" id="page-expenses">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2 style="font-size:18px;font-weight:600;">Expense Records</h2>
+        <button class="btn btn-accent" onclick="openModal('expense-modal')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Expense
+        </button>
+      </div>
+      <div class="filter-bar">
+        <input type="text" placeholder="Search expenses..." id="expense-search" oninput="renderExpenses()">
+        <select id="expense-cat-filter" onchange="renderExpenses()"><option value="">All Categories</option></select>
+        <input type="month" id="expense-month-filter" onchange="renderExpenses()">
+      </div>
+      <div class="card">
+        <div class="card-body no-pad">
+          <table class="data-table" id="expense-table"></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- P&L -->
+    <div class="page" id="page-pl">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2 style="font-size:18px;font-weight:600;">Profit & Loss</h2>
+        <div style="display:flex;gap:8px;">
+          <select id="pl-period" onchange="renderPL()" style="background:var(--bg-input);border:1.5px solid var(--border);border-radius:var(--radius);padding:8px 12px;color:var(--text-primary);font-family:var(--font);font-size:13px;">
+            <option value="this-month">This Month</option>
+            <option value="last-month">Last Month</option>
+            <option value="this-year">This Year</option>
+            <option value="custom">Custom Range</option>
+          </select>
+          <button class="btn btn-gold" onclick="downloadReport('pl')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download PDF
+          </button>
+        </div>
+      </div>
+      <div id="pl-custom-range" style="display:none;margin-bottom:14px;display:none;">
+        <div class="filter-bar">
+          <input type="date" id="pl-from"><input type="date" id="pl-to">
+          <button class="btn btn-outline btn-sm" onclick="renderPL()">Apply</button>
+        </div>
+      </div>
+      <div id="pl-content"></div>
+    </div>
+
+    <!-- INVOICES -->
+    <div class="page" id="page-invoices">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2 style="font-size:18px;font-weight:600;">Invoices & Receipts</h2>
+        <button class="btn btn-accent" onclick="openModal('invoice-modal');resetInvoiceForm()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Invoice
+        </button>
+      </div>
+      <div class="filter-bar">
+        <input type="text" placeholder="Search invoices..." id="inv-search" oninput="renderInvoices()">
+        <select id="inv-status-filter" onchange="renderInvoices()">
+          <option value="">All Status</option>
+          <option value="paid">Paid</option>
+          <option value="unpaid">Unpaid</option>
+        </select>
+      </div>
+      <div class="card">
+        <div class="card-body no-pad">
+          <table class="data-table" id="invoice-table"></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- STOCK -->
+    <div class="page" id="page-stock">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;">
+        <h2 style="font-size:18px;font-weight:600;">Stock & Inventory</h2>
+        <button class="btn btn-accent" onclick="openModal('stock-modal');resetStockForm()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Item
+        </button>
+      </div>
+      <div id="stock-alert-area"></div>
+      <div class="filter-bar">
+        <input type="text" placeholder="Search inventory..." id="stock-search" oninput="renderStock()">
+        <select id="stock-cat-filter" onchange="renderStock()"><option value="">All Categories</option></select>
+      </div>
+      <div class="card">
+        <div class="card-body no-pad">
+          <table class="data-table" id="stock-table"></table>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORTS -->
+    <div class="page" id="page-reports">
+      <h2 style="font-size:18px;font-weight:600;margin-bottom:20px;">Reports & Downloads</h2>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;" id="reports-grid"></div>
+    </div>
+
+    <!-- SETTINGS -->
+    <div class="page" id="page-settings">
+      <h2 style="font-size:18px;font-weight:600;margin-bottom:20px;">Settings</h2>
+      <div style="max-width:560px;">
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header"><h3>Business Information</h3></div>
+          <div class="card-body">
+            <div class="frow">
+              <div class="fg"><label>Business Name</label><input type="text" id="set-biz-name"></div>
+              <div class="fg"><label>Business Type</label><select id="set-biz-type"><option>Retail</option><option>Restaurant</option><option>Services</option><option>Manufacturing</option><option>Wholesale</option><option>Other</option></select></div>
+            </div>
+            <div class="frow">
+              <div class="fg"><label>Currency</label>
+                <select id="set-currency">
+                  <option value="KES">KES</option><option value="USD">USD</option><option value="UGX">UGX</option><option value="TZS">TZS</option><option value="ZAR">ZAR</option><option value="GBP">GBP</option><option value="EUR">EUR</option><option value="NGN">NGN</option>
+                </select>
+              </div>
+              <div class="fg"><label>Contact</label><input type="text" id="set-contact"></div>
+            </div>
+            <div class="fg"><label>Address</label><input type="text" id="set-address"></div>
+            <button class="btn btn-accent" onclick="saveSettings()">Save Changes</button>
+          </div>
+        </div>
+        <div class="card" style="margin-bottom:16px;">
+          <div class="card-header"><h3>Change PIN</h3></div>
+          <div class="card-body">
+            <div class="fg"><label>Current PIN</label><input type="password" id="old-pin" maxlength="4" placeholder="Enter current PIN"></div>
+            <div class="frow">
+              <div class="fg"><label>New PIN</label><input type="password" id="new-pin" maxlength="4" placeholder="4 digits"></div>
+              <div class="fg"><label>Confirm PIN</label><input type="password" id="confirm-pin" maxlength="4" placeholder="Repeat PIN"></div>
+            </div>
+            <button class="btn btn-outline" onclick="changePin()">Update PIN</button>
+          </div>
+        </div>
+        <div class="card">
+          <div class="card-header"><h3>Stock Alert Threshold</h3></div>
+          <div class="card-body">
+            <div class="fg"><label>Alert when quantity below</label><input type="number" id="set-low-stock" min="1" placeholder="e.g. 5"></div>
+            <p style="font-size:12px;color:var(--text-muted);margin-bottom:12px;">Items with quantity at or below this number will trigger a low stock alert.</p>
+            <button class="btn btn-outline" onclick="saveLowStockThreshold()">Save Threshold</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /main-content -->
+</div><!-- /app -->
+
+<!-- MODALS -->
+
+<!-- Income Modal -->
+<div class="modal-overlay" id="income-modal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="income-modal-title">Record Income</h3><button class="modal-close" onclick="closeModal('income-modal')">&times;</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="income-edit-id">
+      <div class="frow">
+        <div class="fg"><label>Date</label><input type="date" id="inc-date"></div>
+        <div class="fg"><label>Amount</label><input type="number" id="inc-amount" placeholder="0.00" step="0.01"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Category</label>
+          <select id="inc-cat">
+            <option>Sales</option><option>Services</option><option>Consulting</option><option>Investment</option><option>Rental Income</option><option>Other Income</option>
+          </select>
+        </div>
+        <div class="fg"><label>Payment Method</label>
+          <select id="inc-method">
+            <option>Cash</option><option>M-Pesa</option><option>Bank Transfer</option><option>Card</option><option>Cheque</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label>Description</label><input type="text" id="inc-desc" placeholder="Brief description"></div>
+      <div class="fg"><label>Reference / Receipt No.</label><input type="text" id="inc-ref" placeholder="Optional"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('income-modal')">Cancel</button>
+      <button class="btn btn-accent" onclick="saveIncome()">Save Income</button>
+    </div>
+  </div>
+</div>
+
+<!-- Expense Modal -->
+<div class="modal-overlay" id="expense-modal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="expense-modal-title">Record Expense</h3><button class="modal-close" onclick="closeModal('expense-modal')">&times;</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="expense-edit-id">
+      <div class="frow">
+        <div class="fg"><label>Date</label><input type="date" id="exp-date"></div>
+        <div class="fg"><label>Amount</label><input type="number" id="exp-amount" placeholder="0.00" step="0.01"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Category</label>
+          <select id="exp-cat">
+            <option>Rent</option><option>Utilities</option><option>Salaries</option><option>Stock Purchase</option><option>Marketing</option><option>Transport</option><option>Equipment</option><option>Maintenance</option><option>Insurance</option><option>Taxes</option><option>Other</option>
+          </select>
+        </div>
+        <div class="fg"><label>Payment Method</label>
+          <select id="exp-method">
+            <option>Cash</option><option>M-Pesa</option><option>Bank Transfer</option><option>Card</option><option>Cheque</option>
+          </select>
+        </div>
+      </div>
+      <div class="fg"><label>Description</label><input type="text" id="exp-desc" placeholder="Brief description"></div>
+      <div class="fg"><label>Vendor / Payee</label><input type="text" id="exp-vendor" placeholder="Optional"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('expense-modal')">Cancel</button>
+      <button class="btn btn-accent" onclick="saveExpense()">Save Expense</button>
+    </div>
+  </div>
+</div>
+
+<!-- Invoice Modal -->
+<div class="modal-overlay" id="invoice-modal">
+  <div class="modal" style="max-width:640px;">
+    <div class="modal-header"><h3 id="inv-modal-title">Create Invoice</h3><button class="modal-close" onclick="closeModal('invoice-modal')">&times;</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="inv-edit-id">
+      <div class="frow">
+        <div class="fg"><label>Client Name</label><input type="text" id="inv-client" placeholder="Client / Company Name"></div>
+        <div class="fg"><label>Client Email (optional)</label><input type="email" id="inv-email" placeholder="client@email.com"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Invoice Date</label><input type="date" id="inv-date"></div>
+        <div class="fg"><label>Due Date</label><input type="date" id="inv-due"></div>
+      </div>
+      <div class="fg"><label>Client Address</label><input type="text" id="inv-client-addr" placeholder="Client address (optional)"></div>
+      <div style="margin-bottom:10px;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+          <label style="font-size:11.5px;font-weight:600;color:var(--text-secondary);letter-spacing:.4px;text-transform:uppercase;">Line Items</label>
+          <button class="btn btn-outline btn-sm" onclick="addInvLine()">+ Add Line</button>
+        </div>
+        <div id="inv-lines"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Tax (%)</label><input type="number" id="inv-tax" placeholder="0" value="0" min="0" oninput="calcInvTotal()"></div>
+        <div class="fg"><label>Discount (%)</label><input type="number" id="inv-disc" placeholder="0" value="0" min="0" oninput="calcInvTotal()"></div>
+      </div>
+      <div class="fg"><label>Notes / Payment Terms</label><textarea id="inv-notes" placeholder="e.g. Payment due within 30 days. Thank you for your business."></textarea></div>
+      <div style="background:var(--bg-deepest);border-radius:var(--radius);padding:14px;display:flex;justify-content:space-between;align-items:center;">
+        <span style="font-size:13px;color:var(--text-secondary);">Invoice Total</span>
+        <span style="font-size:22px;font-weight:700;color:var(--accent-light);font-family:var(--mono);" id="inv-total-display">0.00</span>
+      </div>
+      <div class="fg" style="margin-top:12px;"><label>Status</label>
+        <select id="inv-status"><option value="unpaid">Unpaid</option><option value="paid">Paid</option></select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('invoice-modal')">Cancel</button>
+      <button class="btn btn-gold" onclick="previewInvoice()">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        Preview
+      </button>
+      <button class="btn btn-accent" onclick="saveInvoice()">Save Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stock Modal -->
+<div class="modal-overlay" id="stock-modal">
+  <div class="modal">
+    <div class="modal-header"><h3 id="stock-modal-title">Add Stock Item</h3><button class="modal-close" onclick="closeModal('stock-modal')">&times;</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="stock-edit-id">
+      <div class="frow">
+        <div class="fg"><label>Item Name</label><input type="text" id="st-name" placeholder="Product name"></div>
+        <div class="fg"><label>SKU / Code</label><input type="text" id="st-sku" placeholder="Optional"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Category</label><input type="text" id="st-cat" list="stock-cats" placeholder="e.g. Electronics"></div>
+        <div class="fg"><label>Unit</label>
+          <select id="st-unit"><option>pcs</option><option>kg</option><option>g</option><option>L</option><option>ml</option><option>boxes</option><option>bags</option><option>pairs</option><option>sets</option></select>
+        </div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Quantity in Stock</label><input type="number" id="st-qty" placeholder="0" min="0"></div>
+        <div class="fg"><label>Reorder Level</label><input type="number" id="st-reorder" placeholder="e.g. 5" min="0"></div>
+      </div>
+      <div class="frow">
+        <div class="fg"><label>Cost Price</label><input type="number" id="st-cost" placeholder="0.00" step="0.01" min="0"></div>
+        <div class="fg"><label>Selling Price</label><input type="number" id="st-price" placeholder="0.00" step="0.01" min="0"></div>
+      </div>
+      <div class="fg"><label>Description / Notes</label><textarea id="st-desc" placeholder="Optional notes about this item" style="min-height:60px;"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('stock-modal')">Cancel</button>
+      <button class="btn btn-accent" onclick="saveStock()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stock Sale Modal -->
+<div class="modal-overlay" id="stock-sale-modal">
+  <div class="modal" style="max-width:400px;">
+    <div class="modal-header"><h3>Record Sale</h3><button class="modal-close" onclick="closeModal('stock-sale-modal')">&times;</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="sale-stock-id">
+      <p id="sale-item-name" style="font-weight:600;margin-bottom:12px;color:var(--accent-light);"></p>
+      <p id="sale-qty-info" style="font-size:13px;color:var(--text-secondary);margin-bottom:16px;"></p>
+      <div class="fg"><label>Quantity Sold</label><input type="number" id="sale-qty" placeholder="1" min="1"></div>
+      <div class="fg"><label>Sale Price per Unit (override optional)</label><input type="number" id="sale-price" placeholder="Leave blank to use set price" step="0.01"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-outline" onclick="closeModal('stock-sale-modal')">Cancel</button>
+      <button class="btn btn-accent" onclick="recordSale()">Record Sale</button>
+    </div>
+  </div>
+</div>
+
+<!-- Invoice Preview Modal -->
+<div class="modal-overlay" id="inv-preview-modal">
+  <div class="modal" style="max-width:700px;">
+    <div class="modal-header">
+      <h3>Invoice Preview</h3>
+      <div style="display:flex;gap:8px;">
+        <button class="btn btn-gold btn-sm" onclick="downloadInvoicePDF()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download PDF
+        </button>
+        <button class="modal-close" onclick="closeModal('inv-preview-modal')">&times;</button>
+      </div>
+    </div>
+    <div class="modal-body">
+      <div id="inv-preview-content"></div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirm Dialog -->
+<div class="confirm-overlay" id="confirm-dialog">
+  <div class="confirm-box">
+    <h3 id="confirm-title">Delete Record?</h3>
+    <p id="confirm-msg">This action cannot be undone.</p>
+    <div class="actions">
+      <button class="btn btn-outline" onclick="closeConfirm()">Cancel</button>
+      <button class="btn btn-danger" id="confirm-ok-btn" onclick="confirmAction()">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- Toast Container -->
+<div id="toast-container"></div>
+
+<datalist id="stock-cats"></datalist>
+
+<script>
+// ===================== DATA LAYER =====================
+const DB = {
+  get(k, def=null){try{const v=localStorage.getItem(k);return v!==null?JSON.parse(v):def;}catch{return def;}},
+  set(k,v){localStorage.setItem(k,JSON.stringify(v));},
+  del(k){localStorage.removeItem(k);}
+};
+
+let config = DB.get('lkc_config', null);
+let income = DB.get('lkc_income', []);
+let expenses = DB.get('lkc_expenses', []);
+let invoices = DB.get('lkc_invoices', []);
+let stock = DB.get('lkc_stock', []);
+
+// Admin password - hardcoded for LKC owner; clients set PIN only
+const ADMIN_PASS = DB.get('lkc_admin_pass', 'LKC@Admin2024');
+
+function save(){
+  DB.set('lkc_income', income);
+  DB.set('lkc_expenses', expenses);
+  DB.set('lkc_invoices', invoices);
+  DB.set('lkc_stock', stock);
+}
+
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
+function today(){return new Date().toISOString().split('T')[0];}
+function fmt(n){const c=config?config.currency:'KES';return c+' '+parseFloat(n||0).toLocaleString('en-KE',{minimumFractionDigits:2,maximumFractionDigits:2});}
+function fmtDate(d){if(!d)return '';const dt=new Date(d+'T00:00:00');return dt.toLocaleDateString('en-KE',{day:'2-digit',month:'short',year:'numeric'});}
+
+// ===================== INSTALL & AUTH =====================
+function verifyInstall(){
+  const pass = document.getElementById('install-admin-pass').value;
+  const err = document.getElementById('install-error');
+  if(pass === ADMIN_PASS || pass === DB.get('lkc_admin_pass_custom', ADMIN_PASS)){
+    document.getElementById('install-screen').style.display='none';
+    document.getElementById('setup-screen').style.display='flex';
+    document.getElementById('s-biz').focus();
+    err.textContent='';
+  } else {
+    err.textContent='Incorrect administrator password. Contact LKC Accounting.';
+    document.getElementById('install-admin-pass').value='';
+  }
+}
+
+function completeSetup(){
+  const biz=document.getElementById('s-biz').value.trim();
+  const pins=[0,1,2,3].map(i=>document.getElementById('p'+i).value);
+  const err=document.getElementById('setup-error');
+  if(!biz){err.textContent='Please enter your business name.';return;}
+  if(pins.some(p=>p==='')||pins.join('').length!==4){err.textContent='Please set a 4-digit PIN.';return;}
+  const pin=pins.join('');
+  if(!/^\d{4}$/.test(pin)){err.textContent='PIN must be 4 digits (0-9).';return;}
+  config={
+    bizName:biz,
+    bizType:document.getElementById('s-type').value,
+    currency:document.getElementById('s-currency').value,
+    contact:document.getElementById('s-contact').value.trim(),
+    address:document.getElementById('s-address').value.trim(),
+    pin:pin,
+    lowStockThreshold:5,
+    setupDone:true
+  };
+  DB.set('lkc_config',config);
+  document.getElementById('setup-screen').style.display='none';
+  showApp();
+}
+
+// PIN LOGIC
+let pinEntry='';
+function pinPress(n){
+  if(pinEntry.length>=4)return;
+  pinEntry+=n;
+  updatePinDots();
+  if(pinEntry.length===4)setTimeout(checkPin,100);
+}
+function pinDel(){pinEntry=pinEntry.slice(0,-1);updatePinDots();}
+function updatePinDots(err=false){
+  for(let i=0;i<4;i++){
+    const d=document.getElementById('d'+i);
+    d.className='pin-dot'+(i<pinEntry.length?' filled':'');
+    if(err)d.classList.add('error');
+  }
+}
+function checkPin(){
+  if(pinEntry===config.pin){
+    document.getElementById('pin-error').textContent='';
+    document.getElementById('lock-screen').style.display='none';
+    showApp();
+  } else {
+    document.getElementById('pin-error').textContent='Incorrect PIN. Try again.';
+    updatePinDots(true);
+    setTimeout(()=>{pinEntry='';updatePinDots();document.getElementById('pin-error').textContent='';},800);
+  }
+}
+
+function lockApp(){
+  pinEntry='';
+  updatePinDots();
+  document.getElementById('app').style.display='none';
+  document.getElementById('lock-screen').style.display='flex';
+}
+
+// ===================== INIT =====================
+window.addEventListener('load', ()=>{
+  if('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(()=>{});
+  if(!DB.get('lkc_setup_done')){
+    document.getElementById('install-screen').style.display='flex';
+    document.getElementById('lock-screen').style.display='none';
+  } else {
+    config=DB.get('lkc_config');
+    document.getElementById('lock-biz-name').textContent=config.bizName||'Professional Accounting';
+    document.getElementById('lock-screen').style.display='flex';
+  }
+  updateOnlineStatus();
+  window.addEventListener('online',updateOnlineStatus);
+  window.addEventListener('offline',updateOnlineStatus);
+  // PIN keyboard
+  document.addEventListener('keydown',e=>{
+    const ls=document.getElementById('lock-screen');
+    if(ls.style.display==='flex'||ls.style.display===''){
+      if(e.key>='0'&&e.key<='9')pinPress(parseInt(e.key));
+      if(e.key==='Backspace')pinDel();
+    }
+  });
+});
+
+// Mark setup done after first setup
+function showApp(){
+  DB.set('lkc_setup_done',true);
+  config=DB.get('lkc_config');
+  income=DB.get('lkc_income',[]);
+  expenses=DB.get('lkc_expenses',[]);
+  invoices=DB.get('lkc_invoices',[]);
+  stock=DB.get('lkc_stock',[]);
+  document.getElementById('app').style.display='block';
+  document.getElementById('lock-screen').style.display='none';
+  document.getElementById('sb-biz-name').textContent=config.bizName;
+  document.getElementById('sb-biz-type').textContent=config.bizType;
+  loadSettingsForm();
+  nav('dashboard');
+  checkLowStock();
+}
+
+function updateOnlineStatus(){
+  const badge=document.getElementById('online-badge');
+  if(navigator.onLine){badge.textContent='Online';badge.className='online-badge online';}
+  else{badge.textContent='Offline';badge.className='online-badge offline';}
+}
+
+// ===================== NAVIGATION =====================
+const PAGE_TITLES={dashboard:'Dashboard',income:'Income Records',expenses:'Expense Records',pl:'Profit & Loss',invoices:'Invoices & Receipts',stock:'Stock & Inventory',reports:'Reports',settings:'Settings'};
+function nav(page){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(i=>i.classList.remove('active'));
+  document.getElementById('page-'+page).classList.add('active');
+  document.querySelector(`.nav-item[onclick="nav('${page}')"]`)?.classList.add('active');
+  document.getElementById('topbar-title').textContent=PAGE_TITLES[page]||page;
+  closeSidebar();
+  if(page==='dashboard')renderDashboard();
+  else if(page==='income')renderIncome();
+  else if(page==='expenses')renderExpenses();
+  else if(page==='pl')renderPL();
+  else if(page==='invoices')renderInvoices();
+  else if(page==='stock')renderStock();
+  else if(page==='reports')renderReports();
+  else if(page==='settings')loadSettingsForm();
+}
+
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+  document.getElementById('sidebar-overlay').classList.toggle('open');
+}
+function closeSidebar(){
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('sidebar-overlay').classList.remove('open');
+}
+
+// ===================== DASHBOARD =====================
+function renderDashboard(){
+  const now=new Date();
+  const thisMonth=now.toISOString().slice(0,7);
+  const monthIncome=income.filter(i=>i.date&&i.date.startsWith(thisMonth)).reduce((s,i)=>s+parseFloat(i.amount||0),0);
+  const monthExpense=expenses.filter(e=>e.date&&e.date.startsWith(thisMonth)).reduce((s,e)=>s+parseFloat(e.amount||0),0);
+  const totalIncome=income.reduce((s,i)=>s+parseFloat(i.amount||0),0);
+  const totalExpense=expenses.reduce((s,e)=>s+parseFloat(e.amount||0),0);
+  const profit=totalIncome-totalExpense;
+  const lowItems=stock.filter(s=>parseInt(s.qty)<=parseInt(config.lowStockThreshold||5));
+  const statsEl=document.getElementById('dash-stats');
+  statsEl.innerHTML=`
+    <div class="stat-card income"><div class="stat-label">This Month Income</div><div class="stat-value pos">${fmt(monthIncome)}</div><div class="stat-sub">Total: ${fmt(totalIncome)}</div></div>
+    <div class="stat-card expense"><div class="stat-label">This Month Expenses</div><div class="stat-value neg">${fmt(monthExpense)}</div><div class="stat-sub">Total: ${fmt(totalExpense)}</div></div>
+    <div class="stat-card profit"><div class="stat-label">Net Profit/Loss</div><div class="stat-value ${profit>=0?'pos':'neg'}">${fmt(profit)}</div><div class="stat-sub">${profit>=0?'Profit':'Loss'} overall</div></div>
+    <div class="stat-card stock"><div class="stat-label">Stock Items</div><div class="stat-value neutral">${stock.length}</div><div class="stat-sub">${lowItems.length} low stock alert${lowItems.length!==1?'s':''}</div></div>
+  `;
+  // Chart - last 6 months
+  const months=[];
+  for(let i=5;i>=0;i--){const d=new Date(now.getFullYear(),now.getMonth()-i,1);months.push({key:d.toISOString().slice(0,7),label:d.toLocaleString('default',{month:'short'})});}
+  const maxVal=Math.max(...months.map(m=>{const mi=income.filter(t=>t.date&&t.date.startsWith(m.key)).reduce((s,t)=>s+parseFloat(t.amount||0),0);const me=expenses.filter(t=>t.date&&t.date.startsWith(m.key)).reduce((s,t)=>s+parseFloat(t.amount||0),0);return Math.max(mi,me);}),1);
+  let bars='';let labels='';
+  months.forEach(m=>{
+    const mi=income.filter(t=>t.date&&t.date.startsWith(m.key)).reduce((s,t)=>s+parseFloat(t.amount||0),0);
+    const me=expenses.filter(t=>t.date&&t.date.startsWith(m.key)).reduce((s,t)=>s+parseFloat(t.amount||0),0);
+    bars+=`<div style="flex:1;display:flex;gap:2px;align-items:flex-end;">
+      <div class="chart-bar income" style="flex:1;height:${Math.round((mi/maxVal)*100)}%;min-height:2px;"></div>
+      <div class="chart-bar expense" style="flex:1;height:${Math.round((me/maxVal)*100)}%;min-height:2px;"></div>
+    </div>`;
+    labels+=`<span style="font-size:10px;color:var(--text-muted);flex:1;text-align:center;">${m.label}</span>`;
+  });
+  document.getElementById('dash-chart').innerHTML=bars;
+  document.getElementById('dash-chart-labels').innerHTML=labels;
+  // Low stock
+  const lsEl=document.getElementById('dash-low-stock');
+  if(lowItems.length===0){lsEl.innerHTML='<p style="padding:20px;text-align:center;color:var(--text-muted);font-size:13px;">No low stock alerts.</p>';return;}
+  let lsHtml='<table class="data-table"><thead><tr><th>Item</th><th>Qty</th><th>Reorder</th></tr></thead><tbody>';
+  lowItems.slice(0,5).forEach(s=>{lsHtml+=`<tr><td>${s.name}</td><td style="color:var(--danger);font-weight:600;">${s.qty} ${s.unit}</td><td>${s.reorder}</td></tr>`;});
+  lsHtml+='</tbody></table>';
+  lsEl.innerHTML=lsHtml;
+  // Recent transactions
+  const all=[...income.map(i=>({...i,type:'income'})),...expenses.map(e=>({...e,type:'expense'}))].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,10);
+  let html='<thead><tr><th>Date</th><th>Description</th><th>Category</th><th class="hide-mobile">Method</th><th style="text-align:right;">Amount</th></tr></thead><tbody>';
+  if(all.length===0){html+='<tr><td colspan="5" style="text-align:center;color:var(--text-muted);padding:24px;">No transactions yet.</td></tr>';}
+  all.forEach(t=>{html+=`<tr><td>${fmtDate(t.date)}</td><td>${t.desc||t.description||'-'}</td><td><span class="badge badge-${t.type}">${t.cat||t.category||''}</span></td><td class="hide-mobile">${t.method||''}</td><td style="text-align:right;" class="amount ${t.type==='income'?'pos':'neg'}">${t.type==='income'?'+':'-'}${fmt(t.amount)}</td></tr>`;});
+  html+='</tbody>';
+  document.getElementById('dash-recent').innerHTML=html;
+}
+
+// ===================== INCOME =====================
+function renderIncome(){
+  const search=(document.getElementById('income-search')?.value||'').toLowerCase();
+  const cat=document.getElementById('income-cat-filter')?.value||'';
+  const month=document.getElementById('income-month-filter')?.value||'';
+  // populate cat filter
+  const cats=[...new Set(income.map(i=>i.cat))];
+  const catEl=document.getElementById('income-cat-filter');
+  const curCat=catEl.value;
+  catEl.innerHTML='<option value="">All Categories</option>'+cats.map(c=>`<option ${c===curCat?'selected':''}>${c}</option>`).join('');
+  let rows=income.filter(i=>{
+    if(search&&!((i.desc||'').toLowerCase().includes(search)||(i.cat||'').toLowerCase().includes(search)||(i.ref||'').toLowerCase().includes(search)))return false;
+    if(cat&&i.cat!==cat)return false;
+    if(month&&(!i.date||!i.date.startsWith(month)))return false;
+    return true;
+  }).sort((a,b)=>b.date.localeCompare(a.date));
+  let html='<thead><tr><th>Date</th><th>Description</th><th>Category</th><th class="hide-mobile">Method</th><th class="hide-mobile">Ref</th><th style="text-align:right;">Amount</th><th></th></tr></thead><tbody>';
+  if(rows.length===0)html+='<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">No income records found.</td></tr>';
+  rows.forEach(r=>{html+=`<tr>
+    <td>${fmtDate(r.date)}</td>
+    <td>${r.desc||'-'}</td>
+    <td><span class="badge badge-income">${r.cat}</span></td>
+    <td class="hide-mobile">${r.method||'-'}</td>
+    <td class="hide-mobile" style="color:var(--text-muted);font-size:12px;">${r.ref||'-'}</td>
+    <td style="text-align:right;" class="amount pos">+${fmt(r.amount)}</td>
+    <td><div style="display:flex;gap:4px;">
+      <button class="btn btn-outline btn-sm" onclick="editIncome('${r.id}')">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteRecord('income','${r.id}')">Del</button>
+    </div></td>
+  </tr>`;});
+  const total=rows.reduce((s,r)=>s+parseFloat(r.amount||0),0);
+  html+=`<tr style="background:var(--bg-deepest);"><td colspan="5" style="font-weight:600;padding:12px 16px;font-size:13px;">Total (filtered)</td><td style="text-align:right;font-weight:700;color:var(--accent-light);font-family:var(--mono);">+${fmt(total)}</td><td></td></tr>`;
+  html+='</tbody>';
+  document.getElementById('income-table').innerHTML=html;
+}
+
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+
+function saveIncome(){
+  const id=document.getElementById('income-edit-id').value;
+  const amount=parseFloat(document.getElementById('inc-amount').value);
+  const date=document.getElementById('inc-date').value;
+  if(!date||isNaN(amount)||amount<=0){toast('Please fill in date and amount.','error');return;}
+  const rec={id:id||uid(),date,amount,cat:document.getElementById('inc-cat').value,method:document.getElementById('inc-method').value,desc:document.getElementById('inc-desc').value,ref:document.getElementById('inc-ref').value};
+  if(id){const idx=income.findIndex(i=>i.id===id);if(idx!==-1)income[idx]=rec;}
+  else income.unshift(rec);
+  save();
+  closeModal('income-modal');
+  resetIncomeForm();
+  renderIncome();
+  toast('Income saved successfully.','success');
+}
+
+function editIncome(id){
+  const r=income.find(i=>i.id===id);if(!r)return;
+  document.getElementById('income-edit-id').value=r.id;
+  document.getElementById('income-modal-title').textContent='Edit Income';
+  document.getElementById('inc-date').value=r.date;
+  document.getElementById('inc-amount').value=r.amount;
+  document.getElementById('inc-cat').value=r.cat;
+  document.getElementById('inc-method').value=r.method;
+  document.getElementById('inc-desc').value=r.desc||'';
+  document.getElementById('inc-ref').value=r.ref||'';
+  openModal('income-modal');
+}
+
+function resetIncomeForm(){
+  document.getElementById('income-edit-id').value='';
+  document.getElementById('income-modal-title').textContent='Record Income';
+  document.getElementById('inc-date').value=today();
+  document.getElementById('inc-amount').value='';
+  document.getElementById('inc-desc').value='';
+  document.getElementById('inc-ref').value='';
+}
+
+// ===================== EXPENSES =====================
+function renderExpenses(){
+  const search=(document.getElementById('expense-search')?.value||'').toLowerCase();
+  const cat=document.getElementById('expense-cat-filter')?.value||'';
+  const month=document.getElementById('expense-month-filter')?.value||'';
+  const cats=[...new Set(expenses.map(e=>e.cat))];
+  const catEl=document.getElementById('expense-cat-filter');
+  const curCat=catEl.value;
+  catEl.innerHTML='<option value="">All Categories</option>'+cats.map(c=>`<option ${c===curCat?'selected':''}>${c}</option>`).join('');
+  let rows=expenses.filter(e=>{
+    if(search&&!((e.desc||'').toLowerCase().includes(search)||(e.cat||'').toLowerCase().includes(search)||(e.vendor||'').toLowerCase().includes(search)))return false;
+    if(cat&&e.cat!==cat)return false;
+    if(month&&(!e.date||!e.date.startsWith(month)))return false;
+    return true;
+  }).sort((a,b)=>b.date.localeCompare(a.date));
+  let html='<thead><tr><th>Date</th><th>Description</th><th>Category</th><th class="hide-mobile">Method</th><th class="hide-mobile">Vendor</th><th style="text-align:right;">Amount</th><th></th></tr></thead><tbody>';
+  if(rows.length===0)html+='<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">No expense records found.</td></tr>';
+  rows.forEach(r=>{html+=`<tr>
+    <td>${fmtDate(r.date)}</td>
+    <td>${r.desc||'-'}</td>
+    <td><span class="badge badge-expense">${r.cat}</span></td>
+    <td class="hide-mobile">${r.method||'-'}</td>
+    <td class="hide-mobile" style="color:var(--text-muted);font-size:12px;">${r.vendor||'-'}</td>
+    <td style="text-align:right;" class="amount neg">-${fmt(r.amount)}</td>
+    <td><div style="display:flex;gap:4px;">
+      <button class="btn btn-outline btn-sm" onclick="editExpense('${r.id}')">Edit</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteRecord('expense','${r.id}')">Del</button>
+    </div></td>
+  </tr>`;});
+  const total=rows.reduce((s,r)=>s+parseFloat(r.amount||0),0);
+  html+=`<tr style="background:var(--bg-deepest);"><td colspan="5" style="font-weight:600;padding:12px 16px;font-size:13px;">Total (filtered)</td><td style="text-align:right;font-weight:700;color:#f08080;font-family:var(--mono);">-${fmt(total)}</td><td></td></tr>`;
+  html+='</tbody>';
+  document.getElementById('expense-table').innerHTML=html;
+}
+
+function saveExpense(){
+  const id=document.getElementById('expense-edit-id').value;
+  const amount=parseFloat(document.getElementById('exp-amount').value);
+  const date=document.getElementById('exp-date').value;
+  if(!date||isNaN(amount)||amount<=0){toast('Please fill in date and amount.','error');return;}
+  const rec={id:id||uid(),date,amount,cat:document.getElementById('exp-cat').value,method:document.getElementById('exp-method').value,desc:document.getElementById('exp-desc').value,vendor:document.getElementById('exp-vendor').value};
+  if(id){const idx=expenses.findIndex(e=>e.id===id);if(idx!==-1)expenses[idx]=rec;}
+  else expenses.unshift(rec);
+  save();
+  closeModal('expense-modal');
+  resetExpenseForm();
+  renderExpenses();
+  toast('Expense saved successfully.','success');
+}
+
+function editExpense(id){
+  const r=expenses.find(e=>e.id===id);if(!r)return;
+  document.getElementById('expense-edit-id').value=r.id;
+  document.getElementById('expense-modal-title').textContent='Edit Expense';
+  document.getElementById('exp-date').value=r.date;
+  document.getElementById('exp-amount').value=r.amount;
+  document.getElementById('exp-cat').value=r.cat;
+  document.getElementById('exp-method').value=r.method;
+  document.getElementById('exp-desc').value=r.desc||'';
+  document.getElementById('exp-vendor').value=r.vendor||'';
+  openModal('expense-modal');
+}
+
+function resetExpenseForm(){
+  document.getElementById('expense-edit-id').value='';
+  document.getElementById('expense-modal-title').textContent='Record Expense';
+  document.getElementById('exp-date').value=today();
+  document.getElementById('exp-amount').value='';
+  document.getElementById('exp-desc').value='';
+  document.getElementById('exp-vendor').value='';
+}
+
+// ===================== DELETE =====================
+let pendingDelete=null;
+function deleteRecord(type, id){
+  pendingDelete={type,id};
+  const labels={income:'income record',expense:'expense record',invoice:'invoice',stock:'stock item'};
+  document.getElementById('confirm-title').textContent='Delete '+labels[type]+'?';
+  document.getElementById('confirm-msg').textContent='This record will be permanently deleted and cannot be recovered.';
+  document.getElementById('confirm-dialog').classList.add('open');
+}
+function closeConfirm(){document.getElementById('confirm-dialog').classList.remove('open');pendingDelete=null;}
+function confirmAction(){
+  if(!pendingDelete)return;
+  const{type,id}=pendingDelete;
+  if(type==='income'){income=income.filter(i=>i.id!==id);}
+  else if(type==='expense'){expenses=expenses.filter(e=>e.id!==id);}
+  else if(type==='invoice'){invoices=invoices.filter(i=>i.id!==id);}
+  else if(type==='stock'){stock=stock.filter(s=>s.id!==id);}
+  save();
+  closeConfirm();
+  toast('Record deleted.','success');
+  if(type==='income')renderIncome();
+  else if(type==='expense')renderExpenses();
+  else if(type==='invoice')renderInvoices();
+  else if(type==='stock'){renderStock();checkLowStock();}
+}
+
+// ===================== P&L =====================
+function renderPL(){
+  const period=document.getElementById('pl-period').value;
+  const now=new Date();
+  let from,to,label;
+  if(period==='this-month'){from=new Date(now.getFullYear(),now.getMonth(),1);to=new Date(now.getFullYear(),now.getMonth()+1,0);label='This Month';}
+  else if(period==='last-month'){from=new Date(now.getFullYear(),now.getMonth()-1,1);to=new Date(now.getFullYear(),now.getMonth(),0);label='Last Month';}
+  else if(period==='this-year'){from=new Date(now.getFullYear(),0,1);to=new Date(now.getFullYear(),11,31);label='This Year';}
+  else{from=new Date(document.getElementById('pl-from').value||now);to=new Date(document.getElementById('pl-to').value||now);label='Custom Range';document.getElementById('pl-custom-range').style.display='flex';}
+  if(period!=='custom')document.getElementById('pl-custom-range').style.display='none';
+  const fromStr=from.toISOString().split('T')[0];
+  const toStr=to.toISOString().split('T')[0];
+  const filtIncome=income.filter(i=>i.date&&i.date>=fromStr&&i.date<=toStr);
+  const filtExpense=expenses.filter(e=>e.date&&e.date>=fromStr&&e.date<=toStr);
+  const totalInc=filtIncome.reduce((s,i)=>s+parseFloat(i.amount||0),0);
+  const totalExp=filtExpense.reduce((s,e)=>s+parseFloat(e.amount||0),0);
+  const profit=totalInc-totalExp;
+  const margin=totalInc>0?(profit/totalInc*100):0;
+  // Group income by cat
+  const incByCat={};filtIncome.forEach(i=>{incByCat[i.cat]=(incByCat[i.cat]||0)+parseFloat(i.amount||0);});
+  const expByCat={};filtExpense.forEach(e=>{expByCat[e.cat]=(expByCat[e.cat]||0)+parseFloat(e.amount||0);});
+  let html=`
+    <div class="stat-grid" style="margin-bottom:20px;">
+      <div class="stat-card income"><div class="stat-label">Total Income</div><div class="stat-value pos">${fmt(totalInc)}</div><div class="stat-sub">${label}</div></div>
+      <div class="stat-card expense"><div class="stat-label">Total Expenses</div><div class="stat-value neg">${fmt(totalExp)}</div></div>
+      <div class="stat-card profit"><div class="stat-label">Net ${profit>=0?'Profit':'Loss'}</div><div class="stat-value ${profit>=0?'pos':'neg'}">${fmt(Math.abs(profit))}</div><div class="stat-sub">Margin: ${margin.toFixed(1)}%</div></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+      <div class="card">
+        <div class="card-header"><h3>Income Breakdown</h3></div>
+        <div class="card-body no-pad">
+          <div class="pl-row pl-header-row"><span>Category</span><span>Amount</span></div>
+  `;
+  Object.entries(incByCat).sort((a,b)=>b[1]-a[1]).forEach(([cat,amt])=>{html+=`<div class="pl-row"><span>${cat}</span><span style="color:var(--accent-light);font-family:var(--mono);">${fmt(amt)}</span></div>`;});
+  html+=`<div class="pl-row pl-total-row"><span>Total Income</span><span style="color:var(--accent-light);font-family:var(--mono);">${fmt(totalInc)}</span></div></div></div>
+    <div class="card">
+      <div class="card-header"><h3>Expense Breakdown</h3></div>
+      <div class="card-body no-pad">
+        <div class="pl-row pl-header-row"><span>Category</span><span>Amount</span></div>
+  `;
+  Object.entries(expByCat).sort((a,b)=>b[1]-a[1]).forEach(([cat,amt])=>{html+=`<div class="pl-row"><span>${cat}</span><span style="color:#f08080;font-family:var(--mono);">${fmt(amt)}</span></div>`;});
+  html+=`<div class="pl-row pl-total-row"><span>Total Expenses</span><span style="color:#f08080;font-family:var(--mono);">${fmt(totalExp)}</span></div></div></div></div>
+    <div class="card" style="margin-top:16px;">
+      <div class="card-header"><h3>Summary</h3></div>
+      <div class="card-body no-pad">
+        <div class="pl-row"><span>Gross Revenue</span><span style="font-family:var(--mono);">${fmt(totalInc)}</span></div>
+        <div class="pl-row"><span>Total Expenses</span><span style="font-family:var(--mono);color:#f08080;">-${fmt(totalExp)}</span></div>
+        <div class="pl-row pl-total-row"><span>Net ${profit>=0?'Profit':'Loss'}</span><span style="font-family:var(--mono);color:${profit>=0?'var(--accent-light)':'var(--danger)'};">${profit>=0?'+':'-'}${fmt(Math.abs(profit))}</span></div>
+      </div>
+    </div>
+  `;
+  document.getElementById('pl-content').innerHTML=html;
+}
+
+// ===================== INVOICES =====================
+let invLines=[];
+function resetInvoiceForm(){
+  invLines=[{id:uid(),desc:'',qty:1,price:0}];
+  document.getElementById('inv-edit-id').value='';
+  document.getElementById('inv-modal-title').textContent='Create Invoice';
+  document.getElementById('inv-client').value='';
+  document.getElementById('inv-email').value='';
+  document.getElementById('inv-date').value=today();
+  document.getElementById('inv-due').value='';
+  document.getElementById('inv-client-addr').value='';
+  document.getElementById('inv-tax').value='0';
+  document.getElementById('inv-disc').value='0';
+  document.getElementById('inv-notes').value='Payment due within 30 days. Thank you for your business.';
+  document.getElementById('inv-status').value='unpaid';
+  renderInvLines();
+}
+
+function addInvLine(){invLines.push({id:uid(),desc:'',qty:1,price:0});renderInvLines();}
+function removeInvLine(id){if(invLines.length<=1){toast('At least one line item required.','warn');return;}invLines=invLines.filter(l=>l.id!==id);renderInvLines();}
+function updateInvLine(id,field,val){const l=invLines.find(l=>l.id===id);if(l){l[field]=field==='qty'||field==='price'?parseFloat(val)||0:val;}calcInvTotal();}
+
+function renderInvLines(){
+  const el=document.getElementById('inv-lines');
+  el.innerHTML=invLines.map(l=>`
+    <div style="display:grid;grid-template-columns:1fr 60px 100px 30px;gap:6px;margin-bottom:6px;align-items:center;" id="invline-${l.id}">
+      <input type="text" placeholder="Item / service description" value="${l.desc}" oninput="updateInvLine('${l.id}','desc',this.value)" style="background:var(--bg-input);border:1.5px solid var(--border);border-radius:var(--radius);padding:7px 10px;color:var(--text-primary);font-family:var(--font);font-size:13px;outline:none;">
+      <input type="number" placeholder="Qty" value="${l.qty}" oninput="updateInvLine('${l.id}','qty',this.value)" style="background:var(--bg-input);border:1.5px solid var(--border);border-radius:var(--radius);padding:7px 8px;color:var(--text-primary);font-family:var(--font);font-size:13px;outline:none;text-align:center;">
+      <input type="number" placeholder="Unit price" value="${l.price}" oninput="updateInvLine('${l.id}','price',this.value)" style="background:var(--bg-input);border:1.5px solid var(--border);border-radius:var(--radius);padding:7px 8px;color:var(--text-primary);font-family:var(--font);font-size:13px;outline:none;">
+      <button onclick="removeInvLine('${l.id}')" style="background:none;border:none;color:var(--danger);cursor:pointer;font-size:18px;padding:0;line-height:1;">&times;</button>
+    </div>
+  `).join('');
+  calcInvTotal();
+}
+
+function calcInvTotal(){
+  const subtotal=invLines.reduce((s,l)=>s+(parseFloat(l.qty)||0)*(parseFloat(l.price)||0),0);
+  const disc=parseFloat(document.getElementById('inv-disc')?.value||0)/100;
+  const tax=parseFloat(document.getElementById('inv-tax')?.value||0)/100;
+  const discAmt=subtotal*disc;
+  const afterDisc=subtotal-discAmt;
+  const taxAmt=afterDisc*tax;
+  const total=afterDisc+taxAmt;
+  const el=document.getElementById('inv-total-display');
+  if(el)el.textContent=fmt(total);
+  return{subtotal,discAmt,taxAmt,total};
+}
+
+function saveInvoice(){
+  const client=document.getElementById('inv-client').value.trim();
+  if(!client){toast('Please enter client name.','error');return;}
+  const totals=calcInvTotal();
+  const id=document.getElementById('inv-edit-id').value;
+  const invNum=id?invoices.find(i=>i.id===id)?.invNum:('INV-'+String(invoices.length+1).padStart(4,'0'));
+  const rec={id:id||uid(),invNum,client,email:document.getElementById('inv-email').value,clientAddr:document.getElementById('inv-client-addr').value,date:document.getElementById('inv-date').value,due:document.getElementById('inv-due').value,lines:[...invLines],tax:parseFloat(document.getElementById('inv-tax').value||0),disc:parseFloat(document.getElementById('inv-disc').value||0),notes:document.getElementById('inv-notes').value,...totals,status:document.getElementById('inv-status').value};
+  if(id){const idx=invoices.findIndex(i=>i.id===id);if(idx!==-1)invoices[idx]=rec;}
+  else invoices.unshift(rec);
+  save();
+  closeModal('invoice-modal');
+  renderInvoices();
+  toast('Invoice saved.','success');
+}
+
+function renderInvoices(){
+  const search=(document.getElementById('inv-search')?.value||'').toLowerCase();
+  const status=document.getElementById('inv-status-filter')?.value||'';
+  let rows=invoices.filter(i=>{
+    if(search&&!((i.client||'').toLowerCase().includes(search)||(i.invNum||'').toLowerCase().includes(search)))return false;
+    if(status&&i.status!==status)return false;
+    return true;
+  }).sort((a,b)=>(b.date||'').localeCompare(a.date||''));
+  let html='<thead><tr><th>Invoice #</th><th>Client</th><th>Date</th><th class="hide-mobile">Due</th><th style="text-align:right;">Amount</th><th>Status</th><th></th></tr></thead><tbody>';
+  if(rows.length===0)html+='<tr><td colspan="7" style="text-align:center;color:var(--text-muted);padding:24px;">No invoices yet. Create your first invoice.</td></tr>';
+  rows.forEach(r=>{html+=`<tr>
+    <td style="font-family:var(--mono);font-size:12px;">${r.invNum}</td>
+    <td>${r.client}</td>
+    <td>${fmtDate(r.date)}</td>
+    <td class="hide-mobile">${r.due?fmtDate(r.due):'-'}</td>
+    <td style="text-align:right;" class="amount">${fmt(r.total)}</td>
+    <td><span class="badge badge-${r.status}">${r.status.charAt(0).toUpperCase()+r.status.slice(1)}</span></td>
+    <td><div style="display:flex;gap:4px;flex-wrap:wrap;">
+      <button class="btn btn-outline btn-sm" onclick="viewInvoice('${r.id}')">View</button>
+      <button class="btn btn-gold btn-sm" onclick="downloadSingleInvoice('${r.id}')">PDF</button>
+      <button class="btn btn-danger btn-sm" onclick="deleteRecord('invoice','${r.id}')">Del</button>
+    </div></td>
+  </tr>`;});
+  html+='</tbody>';
+  document.getElementById('invoice-table').innerHTML=html;
+}
+
+function viewInvoice(id){
+  const inv=invoices.find(i=>i.id===id);if(!inv)return;
+  currentPreviewInv=inv;
+  document.getElementById('inv-preview-content').innerHTML=buildInvoiceHTML(inv);
+  openModal('inv-preview-modal');
+}
+let currentPreviewInv=null;
+function previewInvoice(){
+  const totals=calcInvTotal();
+  const inv={client:document.getElementById('inv-client').value,email:document.getElementById('inv-email').value,clientAddr:document.getElementById('inv-client-addr').value,date:document.getElementById('inv-date').value,due:document.getElementById('inv-due').value,lines:[...invLines],tax:parseFloat(document.getElementById('inv-tax').value||0),disc:parseFloat(document.getElementById('inv-disc').value||0),notes:document.getElementById('inv-notes').value,...totals,invNum:'PREVIEW',status:'unpaid'};
+  currentPreviewInv=inv;
+  document.getElementById('inv-preview-content').innerHTML=buildInvoiceHTML(inv);
+  openModal('inv-preview-modal');
+}
+function buildInvoiceHTML(inv){
+  const cur=config.currency;
+  const fmtN=n=>`${cur} ${parseFloat(n||0).toLocaleString('en-KE',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+  let items=inv.lines.map(l=>`<tr><td>${l.desc||'-'}</td><td style="text-align:center;">${l.qty}</td><td style="text-align:right;">${fmtN(l.price)}</td><td style="text-align:right;font-weight:600;">${fmtN((parseFloat(l.qty)||0)*(parseFloat(l.price)||0))}</td></tr>`).join('');
+  return `<div class="invoice-preview">
+    <div class="inv-header">
+      <div><div class="inv-title">INVOICE</div><div style="font-size:22px;font-weight:700;margin-top:4px;">${config.bizName}</div><div class="inv-biz">${config.bizType}<br>${config.address||''}<br>${config.contact||''}</div></div>
+      <div class="inv-meta"><strong>Invoice #</strong> ${inv.invNum}<br><strong>Date:</strong> ${fmtDate(inv.date)}<br><strong>Due:</strong> ${inv.due?fmtDate(inv.due):'-'}<br><span style="padding:3px 10px;border-radius:20px;font-size:11px;font-weight:600;background:${inv.status==='paid'?'#d1fae5':'#fef3c7'};color:${inv.status==='paid'?'#065f46':'#92400e'};">${inv.status.toUpperCase()}</span></div>
+    </div>
+    <div style="background:#f8fafc;border-radius:6px;padding:12px 16px;margin-bottom:16px;"><strong>Bill To:</strong><br>${inv.client}<br>${inv.clientAddr||''}<br>${inv.email||''}</div>
+    <table class="inv-table"><thead><tr><th>Description</th><th style="text-align:center;">Qty</th><th style="text-align:right;">Unit Price</th><th style="text-align:right;">Total</th></tr></thead><tbody>${items}</tbody></table>
+    <div class="inv-total-section"><div class="inv-totals">
+      <div class="row"><span>Subtotal</span><span>${fmtN(inv.subtotal)}</span></div>
+      ${inv.disc>0?`<div class="row"><span>Discount (${inv.disc}%)</span><span>-${fmtN(inv.discAmt)}</span></div>`:''}
+      ${inv.tax>0?`<div class="row"><span>Tax (${inv.tax}%)</span><span>${fmtN(inv.taxAmt)}</span></div>`:''}
+      <div class="row grand"><span>TOTAL</span><span>${fmtN(inv.total)}</span></div>
+    </div></div>
+    ${inv.notes?`<div class="inv-footer"><strong>Notes:</strong> ${inv.notes}</div>`:''}
+    <div style="margin-top:20px;text-align:center;font-size:11px;color:#999;border-top:1px solid #e2e8f0;padding-top:12px;">Generated by LKC Accounting | ${config.bizName}</div>
+  </div>`;
+}
+
+function downloadSingleInvoice(id){
+  const inv=invoices.find(i=>i.id===id);if(!inv)return;
+  currentPreviewInv=inv;
+  downloadInvoicePDF();
+}
+
+function downloadInvoicePDF(){
+  if(!navigator.onLine){toast('Connect to the internet to download PDF.','warn');return;}
+  if(!currentPreviewInv){toast('No invoice to download.','error');return;}
+  const html=buildInvoiceHTML(currentPreviewInv);
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Invoice - ${config.bizName}</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:'DM Sans',sans-serif;background:#fff;color:#111;padding:24px;}
+  .invoice-preview{max-width:700px;margin:0 auto;}.inv-header{display:flex;justify-content:space-between;margin-bottom:24px;}.inv-title{font-size:28px;font-weight:700;letter-spacing:-1px;color:#1a6b4a;}.inv-meta{text-align:right;font-size:13px;line-height:1.8;}.inv-biz{font-size:13px;line-height:1.6;}.inv-table{width:100%;border-collapse:collapse;margin:20px 0;}.inv-table th{background:#f1f5f9;font-size:11px;text-transform:uppercase;letter-spacing:.5px;padding:9px 12px;text-align:left;font-weight:600;}.inv-table td{padding:10px 12px;border-bottom:1px solid #e2e8f0;font-size:13px;}.inv-total-section{display:flex;justify-content:flex-end;}.inv-totals{width:220px;}.inv-totals .row{display:flex;justify-content:space-between;padding:5px 0;font-size:13px;}.inv-totals .row.grand{font-size:15px;font-weight:700;border-top:2px solid #1a6b4a;margin-top:4px;padding-top:8px;color:#1a6b4a;}.inv-footer{margin-top:28px;padding-top:16px;border-top:1px solid #e2e8f0;font-size:12px;color:#666;}
+  @media print{body{padding:0;}}</style></head><body>${html}<script>window.onload=()=>{window.print();}<\/script></body></html>`);
+  win.document.close();
+}
+
+// ===================== STOCK =====================
+function renderStock(){
+  const search=(document.getElementById('stock-search')?.value||'').toLowerCase();
+  const cat=document.getElementById('stock-cat-filter')?.value||'';
+  const cats=[...new Set(stock.map(s=>s.cat).filter(Boolean))];
+  const catEl=document.getElementById('stock-cat-filter');
+  const cur=catEl.value;
+  catEl.innerHTML='<option value="">All Categories</option>'+cats.map(c=>`<option ${c===cur?'selected':''}>${c}</option>`).join('');
+  const dl=document.getElementById('stock-cats');
+  if(dl)dl.innerHTML=cats.map(c=>`<option value="${c}">`).join('');
+  const thresh=parseInt(config?.lowStockThreshold||5);
+  let rows=stock.filter(s=>{
+    if(search&&!((s.name||'').toLowerCase().includes(search)||(s.sku||'').toLowerCase().includes(search)||(s.cat||'').toLowerCase().includes(search)))return false;
+    if(cat&&s.cat!==cat)return false;
+    return true;
+  }).sort((a,b)=>(a.name||'').localeCompare(b.name||''));
+  const alertEl=document.getElementById('stock-alert-area');
+  const low=rows.filter(s=>parseInt(s.qty)<=thresh);
+  if(low.length>0){alertEl.innerHTML=`<div class="stock-alert-bar"><svg viewBox="0 0 24 24" fill="none" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg><span class="stock-alert-text"><strong>${low.length} item${low.length>1?'s':''}</strong> below reorder level: ${low.map(s=>s.name).join(', ')}</span></div>`;}
+  else alertEl.innerHTML='';
+  let html='<thead><tr><th>Item</th><th class="hide-mobile">SKU</th><th>Category</th><th>Qty</th><th class="hide-mobile">Cost Price</th><th class="hide-mobile">Sell Price</th><th>Status</th><th></th></tr></thead><tbody>';
+  if(rows.length===0)html+='<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:24px;">No stock items. Add your first item.</td></tr>';
+  rows.forEach(s=>{
+    const isLow=parseInt(s.qty)<=thresh;
+    const pct=s.reorder>0?Math.min(100,parseInt(s.qty)/parseInt(s.reorder)*100):100;
+    html+=`<tr>
+      <td><div style="font-weight:500;">${s.name}</div>${s.desc?`<div style="font-size:11px;color:var(--text-muted);">${s.desc}</div>`:''}</td>
+      <td class="hide-mobile" style="font-family:var(--mono);font-size:12px;color:var(--text-muted);">${s.sku||'-'}</td>
+      <td>${s.cat||'-'}</td>
+      <td><div style="font-weight:600;${isLow?'color:var(--danger)':''}">${s.qty} ${s.unit}</div><div class="prog-wrap" style="margin-top:4px;width:60px;"><div class="prog-bar ${pct<=25?'low':pct<=60?'mid':'high'}" style="width:${pct}%;"></div></div></td>
+      <td class="hide-mobile">${fmt(s.cost)}</td>
+      <td class="hide-mobile">${fmt(s.price)}</td>
+      <td><span class="badge badge-${isLow?'low':'ok'}">${isLow?'Low Stock':'In Stock'}</span></td>
+      <td><div style="display:flex;gap:4px;flex-wrap:wrap;">
+        <button class="btn btn-accent btn-sm" onclick="openSaleModal('${s.id}')">Sell</button>
+        <button class="btn btn-outline btn-sm" onclick="editStock('${s.id}')">Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteRecord('stock','${s.id}')">Del</button>
+      </div></td>
+    </tr>`;
+  });
+  html+='</tbody>';
+  document.getElementById('stock-table').innerHTML=html;
+  checkLowStock();
+}
+
+function resetStockForm(){
+  document.getElementById('stock-edit-id').value='';
+  document.getElementById('stock-modal-title').textContent='Add Stock Item';
+  ['st-name','st-sku','st-cat','st-qty','st-reorder','st-cost','st-price','st-desc'].forEach(id=>{document.getElementById(id).value='';});
+  document.getElementById('st-unit').value='pcs';
+}
+
+function saveStock(){
+  const name=document.getElementById('st-name').value.trim();
+  if(!name){toast('Please enter item name.','error');return;}
+  const id=document.getElementById('stock-edit-id').value;
+  const rec={id:id||uid(),name,sku:document.getElementById('st-sku').value.trim(),cat:document.getElementById('st-cat').value.trim(),unit:document.getElementById('st-unit').value,qty:parseInt(document.getElementById('st-qty').value)||0,reorder:parseInt(document.getElementById('st-reorder').value)||0,cost:parseFloat(document.getElementById('st-cost').value)||0,price:parseFloat(document.getElementById('st-price').value)||0,desc:document.getElementById('st-desc').value};
+  if(id){const idx=stock.findIndex(s=>s.id===id);if(idx!==-1)stock[idx]=rec;}
+  else stock.push(rec);
+  save();
+  closeModal('stock-modal');
+  renderStock();
+  toast('Stock item saved.','success');
+}
+
+function editStock(id){
+  const s=stock.find(s=>s.id===id);if(!s)return;
+  document.getElementById('stock-edit-id').value=s.id;
+  document.getElementById('stock-modal-title').textContent='Edit Stock Item';
+  document.getElementById('st-name').value=s.name||'';
+  document.getElementById('st-sku').value=s.sku||'';
+  document.getElementById('st-cat').value=s.cat||'';
+  document.getElementById('st-unit').value=s.unit||'pcs';
+  document.getElementById('st-qty').value=s.qty||0;
+  document.getElementById('st-reorder').value=s.reorder||0;
+  document.getElementById('st-cost').value=s.cost||0;
+  document.getElementById('st-price').value=s.price||0;
+  document.getElementById('st-desc').value=s.desc||'';
+  openModal('stock-modal');
+}
+
+function openSaleModal(id){
+  const s=stock.find(s=>s.id===id);if(!s)return;
+  document.getElementById('sale-stock-id').value=id;
+  document.getElementById('sale-item-name').textContent=s.name;
+  document.getElementById('sale-qty-info').textContent=`Available: ${s.qty} ${s.unit} | Selling Price: ${fmt(s.price)}`;
+  document.getElementById('sale-qty').value=1;
+  document.getElementById('sale-price').value='';
+  openModal('stock-sale-modal');
+}
+
+function recordSale(){
+  const id=document.getElementById('sale-stock-id').value;
+  const s=stock.find(s=>s.id===id);if(!s)return;
+  const qty=parseInt(document.getElementById('sale-qty').value)||0;
+  if(qty<=0){toast('Quantity must be at least 1.','error');return;}
+  if(qty>parseInt(s.qty)){toast(`Only ${s.qty} ${s.unit} available.`,'error');return;}
+  const price=parseFloat(document.getElementById('sale-price').value)||parseFloat(s.price)||0;
+  const total=qty*price;
+  s.qty=parseInt(s.qty)-qty;
+  // Record as income
+  income.unshift({id:uid(),date:today(),amount:total,cat:'Sales',method:'Cash',desc:`Sale: ${s.name} x${qty}`,ref:''});
+  save();
+  closeModal('stock-sale-modal');
+  renderStock();
+  toast(`Sale recorded. Stock updated. Revenue: ${fmt(total)}`,'success');
+}
+
+function checkLowStock(){
+  const thresh=parseInt(config?.lowStockThreshold||5);
+  const low=stock.filter(s=>parseInt(s.qty)<=thresh);
+  const badge=document.getElementById('stock-badge');
+  if(badge){if(low.length>0){badge.style.display='inline';badge.textContent=low.length;}else{badge.style.display='none';}}
+}
+
+// ===================== REPORTS =====================
+function renderReports(){
+  const reports=[
+    {title:'Profit & Loss Report',desc:'Full income vs expense breakdown for any period.',icon:'chart',action:()=>downloadReport('pl')},
+    {title:'Income Report',desc:'All income records with categories and totals.',icon:'income',action:()=>downloadReport('income')},
+    {title:'Expense Report',desc:'All expense records with categories and totals.',icon:'expense',action:()=>downloadReport('expense')},
+    {title:'Stock Report',desc:'Complete inventory with stock levels and values.',icon:'stock',action:()=>downloadReport('stock')},
+    {title:'Invoice Report',desc:'All invoices with payment status and totals.',icon:'invoice',action:()=>downloadReport('invoice')},
+  ];
+  const icons={chart:'<path d="M18 20V10"/><path d="M12 20V4"/><path d="M6 20V14"/>',income:'<polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/>',expense:'<polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/>',stock:'<path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>',invoice:'<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>',};
+  document.getElementById('reports-grid').innerHTML=reports.map(r=>`
+    <div class="card" style="cursor:pointer;" onclick="${r.action.toString().replace('()=>','').replace('()=>{','').replace('}','')}downloadReport('${r.icon}')">
+      <div class="card-body" style="display:flex;flex-direction:column;gap:12px;">
+        <div style="width:40px;height:40px;border-radius:10px;background:var(--accent-dim);display:flex;align-items:center;justify-content:center;">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--accent-light)" stroke-width="2">${icons[r.icon]||icons.chart}</svg>
+        </div>
+        <div><div style="font-weight:600;margin-bottom:4px;">${r.title}</div><div style="font-size:12.5px;color:var(--text-muted);">${r.desc}</div></div>
+        <button class="btn btn-gold btn-sm" style="align-self:flex-start;" onclick="event.stopPropagation();downloadReport('${r.icon}')">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Download PDF
+        </button>
+      </div>
+    </div>
+  `).join('');
+}
+
+function downloadReport(type){
+  if(!navigator.onLine){toast('Connect to the internet to download PDF reports.','warn');return;}
+  const biz=config.bizName;
+  const cur=config.currency;
+  const fmtN=n=>`${cur} ${parseFloat(n||0).toLocaleString('en-KE',{minimumFractionDigits:2,maximumFractionDigits:2})}`;
+  let body='';let title='';
+  if(type==='pl'||type==='chart'){
+    title='Profit & Loss Report';
+    const totInc=income.reduce((s,i)=>s+parseFloat(i.amount||0),0);
+    const totExp=expenses.reduce((s,e)=>s+parseFloat(e.amount||0),0);
+    const prof=totInc-totExp;
+    const incByCat={};income.forEach(i=>{incByCat[i.cat]=(incByCat[i.cat]||0)+parseFloat(i.amount||0);});
+    const expByCat={};expenses.forEach(e=>{expByCat[e.cat]=(expByCat[e.cat]||0)+parseFloat(e.amount||0);});
+    body=`<h2>Income</h2><table>${Object.entries(incByCat).map(([c,a])=>`<tr><td>${c}</td><td>${fmtN(a)}</td></tr>`).join('')}<tr class="total"><td>Total Income</td><td>${fmtN(totInc)}</td></tr></table>
+    <h2>Expenses</h2><table>${Object.entries(expByCat).map(([c,a])=>`<tr><td>${c}</td><td>${fmtN(a)}</td></tr>`).join('')}<tr class="total"><td>Total Expenses</td><td>${fmtN(totExp)}</td></tr></table>
+    <h2>Summary</h2><table><tr><td>Net ${prof>=0?'Profit':'Loss'}</td><td style="color:${prof>=0?'green':'red'};font-weight:700;">${fmtN(Math.abs(prof))}</td></tr></table>`;
+  } else if(type==='income'){
+    title='Income Report';
+    body=`<table><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Method</th><th>Amount</th></tr></thead><tbody>${income.map(i=>`<tr><td>${fmtDate(i.date)}</td><td>${i.desc||''}</td><td>${i.cat}</td><td>${i.method}</td><td>${fmtN(i.amount)}</td></tr>`).join('')}<tr class="total"><td colspan="4">Total</td><td>${fmtN(income.reduce((s,i)=>s+parseFloat(i.amount||0),0))}</td></tr></tbody></table>`;
+  } else if(type==='expense'){
+    title='Expense Report';
+    body=`<table><thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Method</th><th>Amount</th></tr></thead><tbody>${expenses.map(e=>`<tr><td>${fmtDate(e.date)}</td><td>${e.desc||''}</td><td>${e.cat}</td><td>${e.method}</td><td>${fmtN(e.amount)}</td></tr>`).join('')}<tr class="total"><td colspan="4">Total</td><td>${fmtN(expenses.reduce((s,e)=>s+parseFloat(e.amount||0),0))}</td></tr></tbody></table>`;
+  } else if(type==='stock'){
+    title='Stock & Inventory Report';
+    const totalVal=stock.reduce((s,i)=>s+(parseFloat(i.qty)||0)*(parseFloat(i.cost)||0),0);
+    body=`<table><thead><tr><th>Item</th><th>SKU</th><th>Category</th><th>Qty</th><th>Unit</th><th>Cost Price</th><th>Sell Price</th><th>Stock Value</th></tr></thead><tbody>${stock.map(s=>`<tr><td>${s.name}</td><td>${s.sku||'-'}</td><td>${s.cat||'-'}</td><td>${s.qty}</td><td>${s.unit}</td><td>${fmtN(s.cost)}</td><td>${fmtN(s.price)}</td><td>${fmtN((parseFloat(s.qty)||0)*(parseFloat(s.cost)||0))}</td></tr>`).join('')}<tr class="total"><td colspan="7">Total Stock Value</td><td>${fmtN(totalVal)}</td></tr></tbody></table>`;
+  } else if(type==='invoice'){
+    title='Invoice Report';
+    const totPaid=invoices.filter(i=>i.status==='paid').reduce((s,i)=>s+parseFloat(i.total||0),0);
+    const totUnpaid=invoices.filter(i=>i.status!=='paid').reduce((s,i)=>s+parseFloat(i.total||0),0);
+    body=`<table><thead><tr><th>Invoice #</th><th>Client</th><th>Date</th><th>Due</th><th>Status</th><th>Amount</th></tr></thead><tbody>${invoices.map(i=>`<tr><td>${i.invNum}</td><td>${i.client}</td><td>${fmtDate(i.date)}</td><td>${fmtDate(i.due)}</td><td>${i.status}</td><td>${fmtN(i.total)}</td></tr>`).join('')}</tbody></table>
+    <table style="margin-top:16px;"><tr><td>Total Paid</td><td>${fmtN(totPaid)}</td></tr><tr class="total"><td>Total Outstanding</td><td>${fmtN(totUnpaid)}</td></tr></table>`;
+  }
+  const win=window.open('','_blank');
+  win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title} - ${biz}</title>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>*{box-sizing:border-box;margin:0;padding:0;}body{font-family:'DM Sans',sans-serif;background:#fff;color:#111;padding:32px;max-width:900px;margin:0 auto;}
+  .rpt-header{display:flex;justify-content:space-between;align-items:flex-start;padding-bottom:16px;border-bottom:3px solid #1a6b4a;margin-bottom:24px;}
+  .rpt-biz{font-size:22px;font-weight:700;color:#1a6b4a;}.rpt-title{font-size:13px;color:#666;}
+  h2{font-size:14px;font-weight:600;text-transform:uppercase;letter-spacing:.5px;color:#1a6b4a;margin:20px 0 8px;}
+  table{width:100%;border-collapse:collapse;font-size:13px;margin-bottom:12px;}
+  th{background:#f1f5f9;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.4px;padding:8px 12px;text-align:left;}
+  td{padding:8px 12px;border-bottom:1px solid #e2e8f0;}
+  tr.total td{font-weight:700;background:#f8fafc;border-top:2px solid #1a6b4a;}
+  .footer{margin-top:32px;padding-top:12px;border-top:1px solid #e2e8f0;font-size:11px;color:#999;text-align:center;}
+  @media print{body{padding:0;}}</style></head><body>
+  <div class="rpt-header"><div><div class="rpt-biz">${biz}</div><div class="rpt-title">${config.address||''} | ${config.contact||''}</div></div><div style="text-align:right;"><div style="font-size:18px;font-weight:700;">${title}</div><div style="font-size:12px;color:#666;">Generated: ${new Date().toLocaleDateString('en-KE',{day:'2-digit',month:'long',year:'numeric'})}</div></div></div>
+  ${body}
+  <div class="footer">Generated by LKC Accounting &mdash; ${biz}</div>
+  <script>window.onload=()=>{window.print();}<\/script></body></html>`);
+  win.document.close();
+}
+
+// ===================== SETTINGS =====================
+function loadSettingsForm(){
+  if(!config)return;
+  document.getElementById('set-biz-name').value=config.bizName||'';
+  document.getElementById('set-biz-type').value=config.bizType||'Retail';
+  document.getElementById('set-currency').value=config.currency||'KES';
+  document.getElementById('set-contact').value=config.contact||'';
+  document.getElementById('set-address').value=config.address||'';
+  document.getElementById('set-low-stock').value=config.lowStockThreshold||5;
+}
+
+function saveSettings(){
+  config.bizName=document.getElementById('set-biz-name').value.trim()||config.bizName;
+  config.bizType=document.getElementById('set-biz-type').value;
+  config.currency=document.getElementById('set-currency').value;
+  config.contact=document.getElementById('set-contact').value.trim();
+  config.address=document.getElementById('set-address').value.trim();
+  DB.set('lkc_config',config);
+  document.getElementById('sb-biz-name').textContent=config.bizName;
+  document.getElementById('sb-biz-type').textContent=config.bizType;
+  toast('Settings saved.','success');
+}
+
+function saveLowStockThreshold(){
+  const val=parseInt(document.getElementById('set-low-stock').value)||5;
+  config.lowStockThreshold=val;
+  DB.set('lkc_config',config);
+  checkLowStock();
+  toast('Low stock threshold updated.','success');
+}
+
+function changePin(){
+  const old=document.getElementById('old-pin').value;
+  const np=document.getElementById('new-pin').value;
+  const cp=document.getElementById('confirm-pin').value;
+  if(old!==config.pin){toast('Current PIN is incorrect.','error');return;}
+  if(!/^\d{4}$/.test(np)){toast('New PIN must be exactly 4 digits.','error');return;}
+  if(np!==cp){toast('PINs do not match.','error');return;}
+  config.pin=np;
+  DB.set('lkc_config',config);
+  document.getElementById('old-pin').value='';
+  document.getElementById('new-pin').value='';
+  document.getElementById('confirm-pin').value='';
+  toast('PIN changed successfully.','success');
+}
+
+// ===================== TOAST =====================
+function toast(msg, type='success'){
+  const el=document.createElement('div');
+  el.className=`toast ${type}`;
+  el.innerHTML=msg;
+  document.getElementById('toast-container').appendChild(el);
+  setTimeout(()=>{el.style.opacity='0';el.style.transform='translateX(20px)';el.style.transition='all .3s';setTimeout(()=>el.remove(),300);},3000);
+}
+
+// ===================== SETUP PIN AUTO-ADVANCE =====================
+document.addEventListener('DOMContentLoaded',()=>{
+  [0,1,2,3].forEach(i=>{
+    const el=document.getElementById('p'+i);
+    if(!el)return;
+    el.addEventListener('input',()=>{
+      if(el.value.length>=1&&i<3)document.getElementById('p'+(i+1))?.focus();
+    });
+  });
+  // Set default dates
+  const today_=today();
+  ['inc-date','exp-date','inv-date'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=today_;});
+});
+</script>
+</body>
+</html>
