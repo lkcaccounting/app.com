@@ -2,7 +2,8 @@
   "name": "LKC Accounting",
   "short_name": "LKC Accounting",
   "description": "Professional accounting software for business owners",
-  "start_url": "/index.html",
+  "start_url": "/app.com/index.html",
+  "scope": "/app.com/",
   "display": "standalone",
   "background_color": "#0f1923",
   "theme_color": "#1a6b4a",
@@ -20,8 +21,5 @@
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "categories": ["finance", "business", "productivity"],
-  "screenshots": [],
-  "prefer_related_applications": false
+  ]
 }
