@@ -1,0 +1,802 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0A1628">
+<meta name="description" content="LKC Accounting - Professional Business Accounting Software">
+<title>LKC Accounting</title>
+<link rel="manifest" href="manifest.json">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- INSTALL / SETUP SCREEN -->
+<div id="setup-screen" class="screen hidden">
+  <div class="setup-container">
+    <div class="setup-logo">
+      <div class="logo-mark">LKC</div>
+      <div class="logo-sub">Accounting</div>
+    </div>
+    <div class="setup-card">
+      <h2>Initial Setup</h2>
+      <p class="setup-desc">Configure your accounting software. This password will be required for installation on any device.</p>
+      <div class="form-group">
+        <label>Business Name</label>
+        <input type="text" id="setup-business-name" placeholder="e.g. Kamau Enterprises Ltd" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Business Owner / Contact</label>
+        <input type="text" id="setup-owner" placeholder="Full name" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Business Email</label>
+        <input type="email" id="setup-email" placeholder="email@business.com" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Business Phone</label>
+        <input type="tel" id="setup-phone" placeholder="+254 700 000 000" autocomplete="off">
+      </div>
+      <div class="form-group">
+        <label>Currency</label>
+        <select id="setup-currency">
+          <option value="KES">KES - Kenyan Shilling</option>
+          <option value="USD">USD - US Dollar</option>
+          <option value="EUR">EUR - Euro</option>
+          <option value="GBP">GBP - British Pound</option>
+          <option value="UGX">UGX - Ugandan Shilling</option>
+          <option value="TZS">TZS - Tanzanian Shilling</option>
+          <option value="ZAR">ZAR - South African Rand</option>
+          <option value="NGN">NGN - Nigerian Naira</option>
+          <option value="GHS">GHS - Ghanaian Cedi</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Administration Password</label>
+        <input type="password" id="setup-admin-pass" placeholder="Create a strong password" autocomplete="new-password">
+        <span class="field-hint">This password prevents unauthorized installation sharing</span>
+      </div>
+      <div class="form-group">
+        <label>Confirm Administration Password</label>
+        <input type="password" id="setup-admin-confirm" placeholder="Confirm password" autocomplete="new-password">
+      </div>
+      <div class="form-group">
+        <label>App PIN (4-6 digits)</label>
+        <input type="password" id="setup-pin" placeholder="Enter PIN" inputmode="numeric" maxlength="6" autocomplete="new-password">
+        <span class="field-hint">Used to unlock the app daily</span>
+      </div>
+      <div class="form-group">
+        <label>Confirm PIN</label>
+        <input type="password" id="setup-pin-confirm" placeholder="Confirm PIN" inputmode="numeric" maxlength="6" autocomplete="new-password">
+      </div>
+      <button class="btn-primary full-width" onclick="completeSetup()">Complete Setup & Launch</button>
+      <div id="setup-error" class="error-msg hidden"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ADMIN PASSWORD VERIFICATION (on fresh install) -->
+<div id="admin-verify-screen" class="screen hidden">
+  <div class="lock-container">
+    <div class="setup-logo">
+      <div class="logo-mark">LKC</div>
+      <div class="logo-sub">Accounting</div>
+    </div>
+    <div class="lock-card">
+      <div class="lock-icon-wrap"><svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></div>
+      <h2>Administration Verification</h2>
+      <p>Enter the administration password to activate this software on this device.</p>
+      <div class="form-group">
+        <label>Administration Password</label>
+        <input type="password" id="admin-verify-pass" placeholder="Enter admin password" autocomplete="off">
+      </div>
+      <button class="btn-primary full-width" onclick="verifyAdminPassword()">Verify & Activate</button>
+      <div id="admin-verify-error" class="error-msg hidden"></div>
+    </div>
+  </div>
+</div>
+
+<!-- PIN SCREEN -->
+<div id="pin-screen" class="screen hidden">
+  <div class="pin-container">
+    <div class="setup-logo">
+      <div class="logo-mark">LKC</div>
+      <div class="logo-sub">Accounting</div>
+    </div>
+    <div class="pin-card">
+      <div class="pin-business-name" id="pin-biz-name"></div>
+      <p class="pin-label">Enter your PIN to continue</p>
+      <div class="pin-dots" id="pin-dots">
+        <span></span><span></span><span></span><span></span><span></span><span></span>
+      </div>
+      <div class="pin-pad">
+        <button onclick="pinInput('1')">1</button>
+        <button onclick="pinInput('2')">2</button>
+        <button onclick="pinInput('3')">3</button>
+        <button onclick="pinInput('4')">4</button>
+        <button onclick="pinInput('5')">5</button>
+        <button onclick="pinInput('6')">6</button>
+        <button onclick="pinInput('7')">7</button>
+        <button onclick="pinInput('8')">8</button>
+        <button onclick="pinInput('9')">9</button>
+        <button class="pin-empty"></button>
+        <button onclick="pinInput('0')">0</button>
+        <button onclick="pinBackspace()" class="pin-back">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"/><line x1="18" y1="9" x2="12" y2="15"/><line x1="12" y1="9" x2="18" y2="15"/></svg>
+        </button>
+      </div>
+      <div id="pin-error" class="error-msg hidden"></div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app" class="hidden">
+  <!-- SIDEBAR -->
+  <nav id="sidebar" class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <div class="logo-mark-sm">LKC</div>
+        <span>Accounting</span>
+      </div>
+      <button class="sidebar-close" onclick="toggleSidebar()">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="sidebar-biz-name" id="sidebar-biz"></div>
+    <ul class="nav-menu">
+      <li><a href="#" onclick="navigate('dashboard')" data-page="dashboard" class="active">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        Dashboard
+      </a></li>
+      <li><a href="#" onclick="navigate('income')" data-page="income">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+        Income
+      </a></li>
+      <li><a href="#" onclick="navigate('expenses')" data-page="expenses">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+        Expenses
+      </a></li>
+      <li><a href="#" onclick="navigate('invoices')" data-page="invoices">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Invoices
+      </a></li>
+      <li><a href="#" onclick="navigate('receipts')" data-page="receipts">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+        Receipts
+      </a></li>
+      <li><a href="#" onclick="navigate('inventory')" data-page="inventory">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+        Inventory
+      </a></li>
+      <li><a href="#" onclick="navigate('reports')" data-page="reports">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        P&L Reports
+      </a></li>
+      <li><a href="#" onclick="navigate('customers')" data-page="customers">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        Customers
+      </a></li>
+      <li><a href="#" onclick="navigate('settings')" data-page="settings">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        Settings
+      </a></li>
+    </ul>
+    <div class="sidebar-footer">
+      <button class="btn-lock" onclick="lockApp()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        Lock App
+      </button>
+    </div>
+  </nav>
+
+  <!-- OVERLAY -->
+  <div id="sidebar-overlay" class="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- MAIN CONTENT -->
+  <div class="main-content">
+    <header class="top-bar">
+      <button class="menu-toggle" onclick="toggleSidebar()">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      </button>
+      <div class="top-bar-title" id="page-title">Dashboard</div>
+      <div class="top-bar-actions" id="top-bar-actions"></div>
+    </header>
+
+    <!-- NOTIFICATION BANNER -->
+    <div id="notification-banner" class="notification-banner hidden"></div>
+
+    <!-- PAGES -->
+    <div class="page-container">
+
+      <!-- DASHBOARD -->
+      <div id="page-dashboard" class="page active">
+        <div class="dashboard-grid">
+          <div class="stat-card income-card">
+            <div class="stat-label">Total Income</div>
+            <div class="stat-value" id="dash-total-income">0.00</div>
+            <div class="stat-period">This month</div>
+          </div>
+          <div class="stat-card expense-card">
+            <div class="stat-label">Total Expenses</div>
+            <div class="stat-value" id="dash-total-expense">0.00</div>
+            <div class="stat-period">This month</div>
+          </div>
+          <div class="stat-card profit-card">
+            <div class="stat-label">Net Profit</div>
+            <div class="stat-value" id="dash-net-profit">0.00</div>
+            <div class="stat-period">This month</div>
+          </div>
+          <div class="stat-card invoice-card">
+            <div class="stat-label">Outstanding Invoices</div>
+            <div class="stat-value" id="dash-outstanding">0</div>
+            <div class="stat-period">Unpaid</div>
+          </div>
+        </div>
+
+        <div class="dash-row">
+          <div class="dash-section">
+            <div class="section-header">
+              <h3>Recent Transactions</h3>
+              <a href="#" onclick="navigate('income')">View All</a>
+            </div>
+            <div id="recent-transactions" class="transaction-list"></div>
+          </div>
+          <div class="dash-section">
+            <div class="section-header">
+              <h3>Low Stock Alerts</h3>
+              <a href="#" onclick="navigate('inventory')">View All</a>
+            </div>
+            <div id="low-stock-list" class="low-stock-alerts"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- INCOME -->
+      <div id="page-income" class="page hidden">
+        <div class="page-toolbar">
+          <button class="btn-primary" onclick="openModal('income-modal')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Record Income
+          </button>
+          <div class="search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Search income..." oninput="filterList('income', this.value)">
+          </div>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Customer</th><th>Amount</th><th>Actions</th></tr></thead>
+            <tbody id="income-table-body"></tbody>
+          </table>
+          <div id="income-empty" class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>
+            <p>No income recorded yet</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- EXPENSES -->
+      <div id="page-expenses" class="page hidden">
+        <div class="page-toolbar">
+          <button class="btn-primary" onclick="openModal('expense-modal')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Record Expense
+          </button>
+          <div class="search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Search expenses..." oninput="filterList('expenses', this.value)">
+          </div>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Date</th><th>Description</th><th>Category</th><th>Vendor</th><th>Amount</th><th>Actions</th></tr></thead>
+            <tbody id="expense-table-body"></tbody>
+          </table>
+          <div id="expense-empty" class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>
+            <p>No expenses recorded yet</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVOICES -->
+      <div id="page-invoices" class="page hidden">
+        <div class="page-toolbar">
+          <button class="btn-primary" onclick="openModal('invoice-modal')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Invoice
+          </button>
+          <div class="filter-tabs">
+            <button class="filter-tab active" onclick="filterInvoices('all', this)">All</button>
+            <button class="filter-tab" onclick="filterInvoices('unpaid', this)">Unpaid</button>
+            <button class="filter-tab" onclick="filterInvoices('paid', this)">Paid</button>
+          </div>
+        </div>
+        <div class="invoices-grid" id="invoices-grid"></div>
+        <div id="invoice-empty" class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+          <p>No invoices created yet</p>
+        </div>
+      </div>
+
+      <!-- RECEIPTS -->
+      <div id="page-receipts" class="page hidden">
+        <div class="page-toolbar">
+          <button class="btn-primary" onclick="openModal('receipt-modal')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            New Receipt
+          </button>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Date</th><th>Receipt No.</th><th>Customer</th><th>Description</th><th>Amount</th><th>Actions</th></tr></thead>
+            <tbody id="receipts-table-body"></tbody>
+          </table>
+          <div id="receipts-empty" class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+            <p>No receipts generated yet</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- INVENTORY -->
+      <div id="page-inventory" class="page hidden">
+        <div class="page-toolbar">
+          <button class="btn-primary" onclick="openModal('inventory-modal')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Stock Item
+          </button>
+          <button class="btn-secondary" onclick="openModal('sale-modal')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+            Record Sale
+          </button>
+          <div class="search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Search inventory..." oninput="filterInventory(this.value)">
+          </div>
+        </div>
+        <div class="data-table-wrap">
+          <table class="data-table">
+            <thead><tr><th>Item Name</th><th>SKU/Code</th><th>Category</th><th>Unit Price</th><th>Quantity</th><th>Low Stock Alert</th><th>Value</th><th>Actions</th></tr></thead>
+            <tbody id="inventory-table-body"></tbody>
+          </table>
+          <div id="inventory-empty" class="empty-state">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>
+            <p>No stock items added yet</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- REPORTS -->
+      <div id="page-reports" class="page hidden">
+        <div class="page-toolbar">
+          <div class="date-filter">
+            <label>From:</label>
+            <input type="date" id="report-from" onchange="generateReport()">
+            <label>To:</label>
+            <input type="date" id="report-to" onchange="generateReport()">
+          </div>
+          <button class="btn-primary" onclick="downloadPDFReport()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Download PDF Report
+          </button>
+        </div>
+        <div class="reports-grid">
+          <div class="report-summary-card">
+            <h4>Revenue Summary</h4>
+            <div class="report-row"><span>Total Income</span><span class="positive" id="rpt-income">0.00</span></div>
+            <div class="report-row"><span>Total Expenses</span><span class="negative" id="rpt-expense">0.00</span></div>
+            <div class="report-divider"></div>
+            <div class="report-row total"><span>Net Profit / Loss</span><span id="rpt-net">0.00</span></div>
+          </div>
+          <div class="report-summary-card">
+            <h4>Income Breakdown</h4>
+            <div id="income-categories-breakdown"></div>
+          </div>
+          <div class="report-summary-card">
+            <h4>Expense Breakdown</h4>
+            <div id="expense-categories-breakdown"></div>
+          </div>
+          <div class="report-summary-card">
+            <h4>Invoice Summary</h4>
+            <div class="report-row"><span>Total Invoiced</span><span id="rpt-invoiced">0.00</span></div>
+            <div class="report-row"><span>Paid</span><span class="positive" id="rpt-paid">0.00</span></div>
+            <div class="report-row"><span>Outstanding</span><span class="negative" id="rpt-outstanding">0.00</span></div>
+          </div>
+        </div>
+        <div class="report-table-section">
+          <h3>All Transactions</h3>
+          <div class="data-table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Date</th><th>Type</th><th>Description</th><th>Category</th><th>Amount</th></tr></thead>
+              <tbody id="report-transactions-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- CUSTOMERS -->
+      <div id="page-customers" class="page hidden">
+        <div class="page-toolbar">
+          <button class="btn-primary" onclick="openModal('customer-modal')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add Customer
+          </button>
+          <div class="search-box">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" placeholder="Search customers..." oninput="filterCustomers(this.value)">
+          </div>
+        </div>
+        <div class="customers-grid" id="customers-grid"></div>
+        <div id="customers-empty" class="empty-state">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+          <p>No customers added yet</p>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="page-settings" class="page hidden">
+        <div class="settings-grid">
+          <div class="settings-card">
+            <h3>Business Information</h3>
+            <div class="form-group">
+              <label>Business Name</label>
+              <input type="text" id="set-biz-name">
+            </div>
+            <div class="form-group">
+              <label>Owner / Contact</label>
+              <input type="text" id="set-owner">
+            </div>
+            <div class="form-group">
+              <label>Email</label>
+              <input type="email" id="set-email">
+            </div>
+            <div class="form-group">
+              <label>Phone</label>
+              <input type="tel" id="set-phone">
+            </div>
+            <div class="form-group">
+              <label>Address</label>
+              <textarea id="set-address" rows="3" placeholder="Business address"></textarea>
+            </div>
+            <div class="form-group">
+              <label>Currency</label>
+              <select id="set-currency">
+                <option value="KES">KES - Kenyan Shilling</option>
+                <option value="USD">USD - US Dollar</option>
+                <option value="EUR">EUR - Euro</option>
+                <option value="GBP">GBP - British Pound</option>
+                <option value="UGX">UGX - Ugandan Shilling</option>
+                <option value="TZS">TZS - Tanzanian Shilling</option>
+                <option value="ZAR">ZAR - South African Rand</option>
+                <option value="NGN">NGN - Nigerian Naira</option>
+                <option value="GHS">GHS - Ghanaian Cedi</option>
+              </select>
+            </div>
+            <button class="btn-primary" onclick="saveSettings()">Save Business Info</button>
+          </div>
+          <div class="settings-card">
+            <h3>Security</h3>
+            <div class="form-group">
+              <label>Current PIN</label>
+              <input type="password" id="set-current-pin" inputmode="numeric" maxlength="6" placeholder="Enter current PIN">
+            </div>
+            <div class="form-group">
+              <label>New PIN</label>
+              <input type="password" id="set-new-pin" inputmode="numeric" maxlength="6" placeholder="New PIN (4-6 digits)">
+            </div>
+            <div class="form-group">
+              <label>Confirm New PIN</label>
+              <input type="password" id="set-confirm-pin" inputmode="numeric" maxlength="6" placeholder="Confirm new PIN">
+            </div>
+            <button class="btn-primary" onclick="changePIN()">Update PIN</button>
+            <div id="pin-change-msg" class="success-msg hidden"></div>
+          </div>
+          <div class="settings-card danger-card">
+            <h3>Data Management</h3>
+            <p class="settings-note">Export your data for backup or clear all data. This cannot be undone.</p>
+            <button class="btn-secondary" onclick="exportData()">Export All Data (JSON)</button>
+            <button class="btn-danger" onclick="confirmClearData()">Clear All Data</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end page-container -->
+  </div>
+</div>
+
+<!-- ===== MODALS ===== -->
+
+<!-- INCOME MODAL -->
+<div id="income-modal" class="modal hidden">
+  <div class="modal-backdrop" onclick="closeModal('income-modal')"></div>
+  <div class="modal-box">
+    <div class="modal-header"><h3 id="income-modal-title">Record Income</h3><button onclick="closeModal('income-modal')" class="modal-close">&times;</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="income-edit-id">
+      <div class="form-group"><label>Date *</label><input type="date" id="inc-date"></div>
+      <div class="form-group"><label>Description *</label><input type="text" id="inc-desc" placeholder="e.g. Sales revenue - Product A"></div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="inc-category">
+          <option>Sales Revenue</option><option>Service Revenue</option><option>Consulting Fees</option>
+          <option>Rental Income</option><option>Interest Income</option><option>Other Income</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Customer</label>
+        <select id="inc-customer"><option value="">-- Select Customer --</option></select>
+      </div>
+      <div class="form-group"><label>Amount *</label><input type="number" id="inc-amount" placeholder="0.00" min="0" step="0.01"></div>
+      <div class="form-group"><label>Notes</label><textarea id="inc-notes" rows="2" placeholder="Optional notes"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('income-modal')">Cancel</button>
+      <button class="btn-primary" onclick="saveIncome()">Save Income</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXPENSE MODAL -->
+<div id="expense-modal" class="modal hidden">
+  <div class="modal-backdrop" onclick="closeModal('expense-modal')"></div>
+  <div class="modal-box">
+    <div class="modal-header"><h3 id="expense-modal-title">Record Expense</h3><button onclick="closeModal('expense-modal')" class="modal-close">&times;</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="expense-edit-id">
+      <div class="form-group"><label>Date *</label><input type="date" id="exp-date"></div>
+      <div class="form-group"><label>Description *</label><input type="text" id="exp-desc" placeholder="e.g. Office rent - January"></div>
+      <div class="form-group">
+        <label>Category</label>
+        <select id="exp-category">
+          <option>Rent</option><option>Salaries & Wages</option><option>Utilities</option><option>Office Supplies</option>
+          <option>Marketing</option><option>Travel</option><option>Insurance</option><option>Equipment</option>
+          <option>Maintenance</option><option>Professional Fees</option><option>Cost of Goods Sold</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Vendor / Supplier</label><input type="text" id="exp-vendor" placeholder="Vendor name"></div>
+      <div class="form-group"><label>Amount *</label><input type="number" id="exp-amount" placeholder="0.00" min="0" step="0.01"></div>
+      <div class="form-group"><label>Notes</label><textarea id="exp-notes" rows="2" placeholder="Optional notes"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('expense-modal')">Cancel</button>
+      <button class="btn-primary" onclick="saveExpense()">Save Expense</button>
+    </div>
+  </div>
+</div>
+
+<!-- INVOICE MODAL -->
+<div id="invoice-modal" class="modal hidden">
+  <div class="modal-backdrop" onclick="closeModal('invoice-modal')"></div>
+  <div class="modal-box modal-wide">
+    <div class="modal-header"><h3>Create Invoice</h3><button onclick="closeModal('invoice-modal')" class="modal-close">&times;</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="invoice-edit-id">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Invoice Number *</label>
+          <input type="text" id="inv-number" placeholder="INV-0001">
+        </div>
+        <div class="form-group">
+          <label>Date *</label>
+          <input type="date" id="inv-date">
+        </div>
+        <div class="form-group">
+          <label>Due Date</label>
+          <input type="date" id="inv-due">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Bill To (Customer)</label>
+          <select id="inv-customer" onchange="fillCustomerDetails()">
+            <option value="">-- Select Customer --</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label>Customer Email</label>
+          <input type="email" id="inv-cust-email" placeholder="customer@email.com">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Customer Address</label>
+        <input type="text" id="inv-cust-address" placeholder="Customer address">
+      </div>
+      <div class="invoice-items-section">
+        <label>Line Items</label>
+        <table class="invoice-items-table">
+          <thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th><th></th></tr></thead>
+          <tbody id="invoice-items-body">
+          </tbody>
+        </table>
+        <button class="btn-ghost btn-sm" onclick="addInvoiceItem()">+ Add Line Item</button>
+      </div>
+      <div class="invoice-totals">
+        <div class="inv-total-row"><span>Subtotal</span><span id="inv-subtotal">0.00</span></div>
+        <div class="inv-total-row">
+          <span>Tax (%)</span>
+          <input type="number" id="inv-tax" value="0" min="0" max="100" step="0.1" style="width:60px;text-align:right" onchange="recalcInvoice()">
+        </div>
+        <div class="inv-total-row inv-total-final"><span>Total</span><span id="inv-total">0.00</span></div>
+      </div>
+      <div class="form-group"><label>Notes / Payment Terms</label><textarea id="inv-notes" rows="2" placeholder="e.g. Payment due within 30 days. Bank: ..."></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('invoice-modal')">Cancel</button>
+      <button class="btn-primary" onclick="saveInvoice()">Save Invoice</button>
+    </div>
+  </div>
+</div>
+
+<!-- RECEIPT MODAL -->
+<div id="receipt-modal" class="modal hidden">
+  <div class="modal-backdrop" onclick="closeModal('receipt-modal')"></div>
+  <div class="modal-box modal-wide">
+    <div class="modal-header"><h3>Generate Receipt</h3><button onclick="closeModal('receipt-modal')" class="modal-close">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-row">
+        <div class="form-group"><label>Receipt Number *</label><input type="text" id="rec-number" placeholder="REC-0001"></div>
+        <div class="form-group"><label>Date *</label><input type="date" id="rec-date"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Customer</label>
+          <select id="rec-customer" onchange="fillReceiptCustomer()">
+            <option value="">-- Select Customer --</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Customer Email</label><input type="email" id="rec-cust-email"></div>
+      </div>
+      <div class="invoice-items-section">
+        <label>Items</label>
+        <table class="invoice-items-table">
+          <thead><tr><th>Description</th><th>Qty</th><th>Unit Price</th><th>Total</th><th></th></tr></thead>
+          <tbody id="receipt-items-body"></tbody>
+        </table>
+        <button class="btn-ghost btn-sm" onclick="addReceiptItem()">+ Add Item</button>
+      </div>
+      <div class="invoice-totals">
+        <div class="inv-total-row inv-total-final"><span>Total Amount</span><span id="rec-total">0.00</span></div>
+      </div>
+      <div class="form-group"><label>Payment Method</label>
+        <select id="rec-payment">
+          <option>Cash</option><option>M-Pesa</option><option>Bank Transfer</option><option>Cheque</option><option>Card</option><option>Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Notes</label><textarea id="rec-notes" rows="2" placeholder="Optional notes"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('receipt-modal')">Cancel</button>
+      <button class="btn-primary" onclick="saveReceipt()">Save Receipt</button>
+    </div>
+  </div>
+</div>
+
+<!-- INVENTORY MODAL -->
+<div id="inventory-modal" class="modal hidden">
+  <div class="modal-backdrop" onclick="closeModal('inventory-modal')"></div>
+  <div class="modal-box">
+    <div class="modal-header"><h3 id="inventory-modal-title">Add Stock Item</h3><button onclick="closeModal('inventory-modal')" class="modal-close">&times;</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="inv-edit-id">
+      <div class="form-group"><label>Item Name *</label><input type="text" id="item-name" placeholder="Product name"></div>
+      <div class="form-group"><label>SKU / Code</label><input type="text" id="item-sku" placeholder="e.g. PRD-001"></div>
+      <div class="form-group"><label>Category</label><input type="text" id="item-category" placeholder="e.g. Electronics, Clothing"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Unit Price *</label><input type="number" id="item-price" placeholder="0.00" min="0" step="0.01"></div>
+        <div class="form-group"><label>Current Quantity *</label><input type="number" id="item-qty" placeholder="0" min="0"></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label>Low Stock Alert Level</label><input type="number" id="item-low" placeholder="e.g. 5" min="0" title="Alert when quantity drops to or below this number"></div>
+        <div class="form-group"><label>Unit</label><input type="text" id="item-unit" placeholder="e.g. pcs, kg, litres"></div>
+      </div>
+      <div class="form-group"><label>Description</label><textarea id="item-desc" rows="2" placeholder="Optional description"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('inventory-modal')">Cancel</button>
+      <button class="btn-primary" onclick="saveInventoryItem()">Save Item</button>
+    </div>
+  </div>
+</div>
+
+<!-- SALE MODAL -->
+<div id="sale-modal" class="modal hidden">
+  <div class="modal-backdrop" onclick="closeModal('sale-modal')"></div>
+  <div class="modal-box">
+    <div class="modal-header"><h3>Record Stock Sale</h3><button onclick="closeModal('sale-modal')" class="modal-close">&times;</button></div>
+    <div class="modal-body">
+      <div class="form-group"><label>Date *</label><input type="date" id="sale-date"></div>
+      <div class="form-group">
+        <label>Stock Item *</label>
+        <select id="sale-item" onchange="fillSalePrice()"><option value="">-- Select Item --</option></select>
+      </div>
+      <div class="form-group"><label>Quantity Sold *</label><input type="number" id="sale-qty" placeholder="0" min="1" onchange="calcSaleTotal()"></div>
+      <div class="form-row">
+        <div class="form-group"><label>Unit Price</label><input type="number" id="sale-price" placeholder="0.00" step="0.01" onchange="calcSaleTotal()"></div>
+        <div class="form-group"><label>Total Amount</label><input type="text" id="sale-total" readonly placeholder="0.00"></div>
+      </div>
+      <div class="form-group"><label>Customer</label><select id="sale-customer"><option value="">-- Select Customer --</option></select></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('sale-modal')">Cancel</button>
+      <button class="btn-primary" onclick="recordSale()">Record Sale</button>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOMER MODAL -->
+<div id="customer-modal" class="modal hidden">
+  <div class="modal-backdrop" onclick="closeModal('customer-modal')"></div>
+  <div class="modal-box">
+    <div class="modal-header"><h3 id="customer-modal-title">Add Customer</h3><button onclick="closeModal('customer-modal')" class="modal-close">&times;</button></div>
+    <div class="modal-body">
+      <input type="hidden" id="cust-edit-id">
+      <div class="form-group"><label>Name *</label><input type="text" id="cust-name" placeholder="Customer or business name"></div>
+      <div class="form-group"><label>Email</label><input type="email" id="cust-email" placeholder="customer@email.com"></div>
+      <div class="form-group"><label>Phone</label><input type="tel" id="cust-phone" placeholder="+254 700 000 000"></div>
+      <div class="form-group"><label>Address</label><textarea id="cust-address" rows="2" placeholder="Customer address"></textarea></div>
+      <div class="form-group"><label>Notes</label><textarea id="cust-notes" rows="2" placeholder="Any additional notes"></textarea></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('customer-modal')">Cancel</button>
+      <button class="btn-primary" onclick="saveCustomer()">Save Customer</button>
+    </div>
+  </div>
+</div>
+
+<!-- DELETE CONFIRM MODAL -->
+<div id="delete-modal" class="modal hidden">
+  <div class="modal-backdrop" onclick="closeModal('delete-modal')"></div>
+  <div class="modal-box modal-sm">
+    <div class="modal-header"><h3>Confirm Deletion</h3><button onclick="closeModal('delete-modal')" class="modal-close">&times;</button></div>
+    <div class="modal-body">
+      <p id="delete-confirm-msg">Are you sure you want to delete this record? This action cannot be undone.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" onclick="closeModal('delete-modal')">Cancel</button>
+      <button class="btn-danger" id="delete-confirm-btn">Delete</button>
+    </div>
+  </div>
+</div>
+
+<!-- INVOICE VIEW MODAL -->
+<div id="invoice-view-modal" class="modal hidden">
+  <div class="modal-backdrop" onclick="closeModal('invoice-view-modal')"></div>
+  <div class="modal-box modal-wide">
+    <div class="modal-header">
+      <h3>Invoice Preview</h3>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-primary btn-sm" onclick="downloadInvoicePDF()">Download PDF</button>
+        <button onclick="closeModal('invoice-view-modal')" class="modal-close">&times;</button>
+      </div>
+    </div>
+    <div class="modal-body" id="invoice-print-area"></div>
+  </div>
+</div>
+
+<!-- RECEIPT VIEW MODAL -->
+<div id="receipt-view-modal" class="modal hidden">
+  <div class="modal-backdrop" onclick="closeModal('receipt-view-modal')"></div>
+  <div class="modal-box modal-wide">
+    <div class="modal-header">
+      <h3>Receipt Preview</h3>
+      <div style="display:flex;gap:8px;align-items:center;">
+        <button class="btn-primary btn-sm" onclick="downloadReceiptPDF()">Download PDF</button>
+        <button onclick="closeModal('receipt-view-modal')" class="modal-close">&times;</button>
+      </div>
+    </div>
+    <div class="modal-body" id="receipt-print-area"></div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast hidden"></div>
+
+<!-- jsPDF CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
