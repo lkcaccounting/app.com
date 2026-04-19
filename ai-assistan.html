@@ -6,7 +6,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="AI Assistant">
 <meta name="theme-color" content="#0f1923">
-<title>AI Assistant — LKC Accounting</title>
+<title>AI Assistant — ProBooks</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
@@ -531,7 +531,8 @@ ${buildContext()}`;
       headers: {
         'Content-Type': 'application/json',
         'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
+        'anthropic-dangerous-direct-browser-access': 'true',
+        'x-api-key': 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
       },
       body: JSON.stringify({
         model: 'claude-sonnet-4-6',
