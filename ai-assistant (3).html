@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="AI Assistant">
+<meta name="theme-color" content="#0f1923">
+<title>AI Assistant — LKC Accounting</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg-deepest:#0a1119;
+  --bg-dark:#0f1923;
+  --bg-card:#14202e;
+  --bg-card2:#1a2a3a;
+  --bg-input:#1f3145;
+  --border:#2a3f55;
+  --border-light:#1e3047;
+  --accent:#1a8c5a;
+  --accent-light:#22a870;
+  --accent-dim:#0e4d32;
+  --gold:#c9a227;
+  --gold-dim:#7a5c0e;
+  --danger:#d94040;
+  --warn:#d97706;
+  --text-primary:#e8f0f8;
+  --text-secondary:#7a9ab8;
+  --text-muted:#4a6580;
+  --radius:10px;
+  --radius-lg:16px;
+  --font:'DM Sans',system-ui,sans-serif;
+  --mono:'DM Mono',monospace;
+  --sidebar:260px;
+  --topbar:56px;
+}
+html,body{height:100%;background:var(--bg-deepest);color:var(--text-primary);font-family:var(--font);font-size:15px;overflow:hidden;}
+
+/* ── TOPBAR ── */
+.topbar{position:fixed;left:0;right:0;top:0;height:var(--topbar);background:var(--bg-dark);border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 20px;gap:12px;z-index:100;}
+.back-btn{display:flex;align-items:center;gap:6px;background:none;border:1.5px solid var(--border);border-radius:var(--radius);padding:6px 14px;color:var(--text-secondary);font-family:var(--font);font-size:13px;cursor:pointer;transition:all .15s;}
+.back-btn:hover{border-color:var(--accent);color:var(--accent-light);}
+.back-btn svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;}
+.topbar-title{font-size:16px;font-weight:600;flex:1;}
+.topbar-title span{color:var(--accent-light);}
+.ai-badge{font-size:10px;font-weight:600;letter-spacing:.8px;text-transform:uppercase;background:var(--accent-dim);color:var(--accent-light);padding:3px 10px;border-radius:20px;font-family:var(--mono);}
+.online-badge{font-size:11px;padding:3px 10px;border-radius:20px;font-weight:500;font-family:var(--mono);}
+.online-badge.online{background:rgba(26,140,90,.2);color:var(--accent-light);}
+.online-badge.offline{background:rgba(74,101,128,.15);color:var(--text-muted);}
+.biz-label{font-size:12px;color:var(--gold);font-family:var(--mono);font-weight:500;}
+
+/* ── LAYOUT ── */
+.layout{display:flex;height:100vh;padding-top:var(--topbar);}
+
+/* ── SIDEBAR ── */
+.sidebar{width:var(--sidebar);flex-shrink:0;background:var(--bg-dark);border-right:1px solid var(--border);display:flex;flex-direction:column;overflow-y:auto;padding:20px 14px;gap:20px;}
+.sidebar-section-label{font-size:10px;font-weight:600;color:var(--text-muted);letter-spacing:1px;text-transform:uppercase;font-family:var(--mono);margin-bottom:8px;}
+.stat-card{background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;}
+.stat-card:last-child{margin-bottom:0;}
+.stat-name{font-size:11px;color:var(--text-muted);margin-bottom:4px;letter-spacing:.3px;}
+.stat-value{font-size:17px;font-weight:700;font-family:var(--mono);letter-spacing:-.3px;}
+.stat-value.pos{color:var(--accent-light);}
+.stat-value.neg{color:var(--danger);}
+.stat-value.warn{color:var(--gold);}
+.stat-value.neutral{color:var(--text-primary);}
+.chip-group{display:flex;flex-direction:column;gap:6px;}
+.chip{background:none;border:1.5px solid var(--border);border-radius:var(--radius);padding:9px 12px;font-size:12.5px;color:var(--text-secondary);cursor:pointer;text-align:left;font-family:var(--font);line-height:1.4;transition:all .15s;}
+.chip:hover{background:var(--accent-dim);border-color:var(--accent);color:var(--accent-light);}
+
+/* ── CHAT AREA ── */
+.chat-main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+.messages{flex:1;overflow-y:auto;padding:28px 28px 16px;display:flex;flex-direction:column;gap:18px;scroll-behavior:smooth;}
+.messages::-webkit-scrollbar{width:3px;}
+.messages::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px;}
+
+/* ── WELCOME ── */
+.welcome{max-width:480px;margin:auto;text-align:center;padding:20px 0;}
+.welcome-icon{width:60px;height:60px;border-radius:var(--radius-lg);background:var(--accent-dim);border:1.5px solid var(--accent);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;}
+.welcome-icon svg{width:28px;height:28px;stroke:var(--accent-light);fill:none;stroke-width:1.8;}
+.welcome h2{font-size:22px;font-weight:700;letter-spacing:-.5px;margin-bottom:10px;}
+.welcome p{font-size:13.5px;color:var(--text-secondary);line-height:1.7;}
+.welcome-chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:20px;}
+.welcome-chip{background:var(--bg-card);border:1.5px solid var(--border);border-radius:20px;padding:7px 14px;font-size:12px;color:var(--text-secondary);cursor:pointer;font-family:var(--font);transition:all .15s;}
+.welcome-chip:hover{border-color:var(--accent);color:var(--accent-light);}
+
+/* ── MESSAGES ── */
+.msg{display:flex;gap:10px;max-width:640px;}
+.msg.user{flex-direction:row-reverse;align-self:flex-end;}
+.msg.ai{align-self:flex-start;}
+.avatar{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;font-family:var(--mono);flex-shrink:0;letter-spacing:.5px;}
+.ai .avatar{background:var(--accent-dim);color:var(--accent-light);border:1px solid var(--accent);}
+.user .avatar{background:var(--bg-card2);color:var(--text-secondary);border:1px solid var(--border);}
+.bubble{padding:12px 15px;border-radius:var(--radius-lg);font-size:13.5px;line-height:1.7;max-width:520px;}
+.ai .bubble{background:var(--bg-card);border:1px solid var(--border);color:var(--text-primary);border-radius:4px var(--radius-lg) var(--radius-lg) var(--radius-lg);}
+.user .bubble{background:var(--bg-card2);border:1px solid var(--border-light);color:var(--text-primary);border-radius:var(--radius-lg) 4px var(--radius-lg) var(--radius-lg);}
+.offline-note{font-size:11px;color:var(--text-muted);margin-top:6px;font-family:var(--mono);}
+
+/* ── TYPING ── */
+.typing-dots{display:flex;gap:5px;align-items:center;padding:2px 0;}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--text-muted);animation:pulse 1.3s infinite;}
+.dot:nth-child(2){animation-delay:.22s;}
+.dot:nth-child(3){animation-delay:.44s;}
+@keyframes pulse{0%,60%,100%{opacity:.3;transform:scale(1)}30%{opacity:1;transform:scale(1.25)}}
+
+/* ── INPUT BAR ── */
+.input-bar{border-top:1px solid var(--border);background:var(--bg-dark);padding:14px 20px 18px;flex-shrink:0;}
+.input-wrap{display:flex;gap:10px;align-items:flex-end;background:var(--bg-input);border:1.5px solid var(--border);border-radius:var(--radius-lg);padding:10px 12px;transition:border-color .2s;}
+.input-wrap:focus-within{border-color:var(--accent);}
+#userInput{flex:1;border:none;background:none;outline:none;font-size:14px;font-family:var(--font);color:var(--text-primary);resize:none;line-height:1.5;max-height:100px;min-height:21px;}
+#userInput::placeholder{color:var(--text-muted);}
+.send-btn{width:36px;height:36px;border-radius:8px;background:var(--accent);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:background .15s;}
+.send-btn:hover{background:var(--accent-light);}
+.send-btn:disabled{opacity:.35;cursor:not-allowed;}
+.send-btn svg{width:15px;height:15px;fill:#fff;}
+.input-hint{font-size:11px;color:var(--text-muted);text-align:center;margin-top:8px;font-family:var(--mono);}
+
+/* ── OFFLINE BANNER ── */
+.offline-banner{background:rgba(217,119,6,.12);border-bottom:1px solid rgba(217,119,6,.3);padding:8px 20px;font-size:12px;color:var(--gold);display:none;align-items:center;gap:8px;flex-shrink:0;}
+.offline-banner.show{display:flex;}
+.offline-banner svg{width:14px;height:14px;stroke:var(--gold);fill:none;stroke-width:2;flex-shrink:0;}
+
+/* ── RESPONSIVE ── */
+@media(max-width:720px){
+  .sidebar{display:none;}
+  .messages{padding:20px 16px 12px;}
+  .input-bar{padding:10px 14px 14px;}
+  .biz-label{display:none;}
+}
+</style>
+</head>
+<body>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <button class="back-btn" onclick="goBack()">
+    <svg viewBox="0 0 14 14"><path d="M9 11L5 7L9 3"/></svg>
+    Dashboard
+  </button>
+  <span class="topbar-title">LKC <span>AI Assistant</span></span>
+  <span class="ai-badge">Beta</span>
+  <span class="biz-label" id="biz-label"></span>
+  <span class="online-badge" id="online-badge">Checking...</span>
+</div>
+
+<!-- OFFLINE BANNER -->
+<div class="offline-banner" id="offline-banner">
+  <svg viewBox="0 0 24 24"><path d="M1 1l22 22M16.72 11.06A10.94 10.94 0 0 1 19 12.55M5 12.55a10.94 10.94 0 0 1 5.17-2.39M10.71 5.05A16 16 0 0 1 22.54 9M1.42 9a15.91 15.91 0 0 1 4.7-2.88M8.53 16.11a6 6 0 0 1 6.95 0M12 20h.01"/></svg>
+  You're offline — using smart offline mode. Connect to the internet for full AI responses.
+</div>
+
+<!-- LAYOUT -->
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div>
+      <div class="sidebar-section-label">This month</div>
+      <div class="stat-card"><div class="stat-name">Income</div><div class="stat-value pos" id="s-income">—</div></div>
+      <div class="stat-card"><div class="stat-name">Expenses</div><div class="stat-value neg" id="s-expenses">—</div></div>
+      <div class="stat-card"><div class="stat-name">Net profit</div><div class="stat-value" id="s-profit">—</div></div>
+    </div>
+    <div>
+      <div class="sidebar-section-label">Watch list</div>
+      <div class="stat-card"><div class="stat-name">Unpaid invoices</div><div class="stat-value warn" id="s-invoices">—</div></div>
+      <div class="stat-card"><div class="stat-name">Low stock items</div><div class="stat-value neg" id="s-stock">—</div></div>
+    </div>
+    <div>
+      <div class="sidebar-section-label">Quick questions</div>
+      <div class="chip-group">
+        <button class="chip" onclick="ask('Am I profitable this month?')">Am I profitable this month?</button>
+        <button class="chip" onclick="ask('Which expenses should I reduce?')">Which expenses should I reduce?</button>
+        <button class="chip" onclick="ask('What should I do about unpaid invoices?')">What about unpaid invoices?</button>
+        <button class="chip" onclick="ask('Will I have cash flow problems next month?')">Cash flow forecast?</button>
+        <button class="chip" onclick="ask('What stock should I reorder urgently?')">What stock to reorder?</button>
+        <button class="chip" onclick="ask('What is my profit margin?')">What is my profit margin?</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="chat-main">
+    <div class="messages" id="messages">
+      <div class="welcome" id="welcome">
+        <div class="welcome-icon">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <h2>Your AI Accountant</h2>
+        <p>Ask me anything about your finances. I read your live LKC Accounting data and tell you exactly what to do next — even when you're offline.</p>
+        <div class="welcome-chips">
+          <span class="welcome-chip" onclick="ask('Give me a full summary of my business finances')">Full summary</span>
+          <span class="welcome-chip" onclick="ask('Am I making a profit?')">Am I profitable?</span>
+          <span class="welcome-chip" onclick="ask('What are my biggest expenses?')">Top expenses</span>
+          <span class="welcome-chip" onclick="ask('Do I have any unpaid invoices?')">Unpaid invoices</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="input-bar">
+      <div class="input-wrap">
+        <textarea id="userInput" rows="1" placeholder="Ask about your business finances..." onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMsg()">
+          <svg viewBox="0 0 16 16"><path d="M2 8L14 2L9 14L7.5 9.5L2 8Z"/></svg>
+        </button>
+      </div>
+      <p class="input-hint" id="input-hint">Reads your LKC Accounting data automatically</p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══════════════════════════════════════════
+// DATA READER — reads exact keys from your app
+// ═══════════════════════════════════════════
+function readData() {
+  const config   = safeGet('lkc_config', {});
+  const income   = safeGet('lkc_income', []);
+  const expenses = safeGet('lkc_expenses', []);
+  const invoices = safeGet('lkc_invoices', []);
+  const stock    = safeGet('lkc_stock', []);
+  return { config, income, expenses, invoices, stock };
+}
+
+function safeGet(key, def) {
+  try { const v = localStorage.getItem(key); return v ? JSON.parse(v) : def; }
+  catch { return def; }
+}
+
+function buildContext() {
+  const { config, income, expenses, invoices, stock } = readData();
+
+  const now = new Date();
+  const thisMonthStr = now.toISOString().slice(0, 7);
+
+  const isThisMonth = r => r.date && r.date.startsWith(thisMonthStr);
+
+  const monthIncome   = income.filter(isThisMonth).reduce((s, r) => s + parseFloat(r.amount || 0), 0);
+  const monthExpenses = expenses.filter(isThisMonth).reduce((s, r) => s + parseFloat(r.amount || 0), 0);
+  const totalIncome   = income.reduce((s, r) => s + parseFloat(r.amount || 0), 0);
+  const totalExpenses = expenses.reduce((s, r) => s + parseFloat(r.amount || 0), 0);
+  const netProfit     = totalIncome - totalExpenses;
+  const monthProfit   = monthIncome - monthExpenses;
+  const margin        = monthIncome > 0 ? Math.round(monthProfit / monthIncome * 100) : 0;
+
+  const unpaidInvoices = invoices.filter(i => i.status === 'unpaid');
+  const unpaidTotal    = unpaidInvoices.reduce((s, i) => s + parseFloat(i.total || 0), 0);
+
+  const threshold = parseInt(config.lowStockThreshold || 5);
+  const lowStock  = stock.filter(s => parseInt(s.qty || 0) <= threshold);
+
+  // Expense breakdown
+  const expByCat = {};
+  expenses.filter(isThisMonth).forEach(e => {
+    expByCat[e.cat] = (expByCat[e.cat] || 0) + parseFloat(e.amount || 0);
+  });
+  const topExpenses = Object.entries(expByCat)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 5)
+    .map(([c, v]) => `${c}: ${config.currency || 'KES'} ${v.toFixed(0)}`)
+    .join(', ');
+
+  // Income breakdown
+  const incByCat = {};
+  income.filter(isThisMonth).forEach(i => {
+    incByCat[i.cat] = (incByCat[i.cat] || 0) + parseFloat(i.amount || 0);
+  });
+  const topIncome = Object.entries(incByCat)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 3)
+    .map(([c, v]) => `${c}: ${config.currency || 'KES'} ${v.toFixed(0)}`)
+    .join(', ');
+
+  const lowStockList = lowStock.map(s => `${s.name} (qty: ${s.qty} ${s.unit || ''})`).join(', ');
+
+  const cur = config.currency || 'KES';
+
+  return `
+BUSINESS: ${config.bizName || 'Unknown'} | Type: ${config.bizType || 'Not set'} | Currency: ${cur}
+
+THIS MONTH (${thisMonthStr}):
+- Income: ${cur} ${monthIncome.toFixed(0)} | Sources: ${topIncome || 'none'}
+- Expenses: ${cur} ${monthExpenses.toFixed(0)} | Top categories: ${topExpenses || 'none'}
+- Net profit: ${cur} ${monthProfit.toFixed(0)} | Margin: ${margin}%
+
+ALL TIME:
+- Total income: ${cur} ${totalIncome.toFixed(0)}
+- Total expenses: ${cur} ${totalExpenses.toFixed(0)}
+- Net profit/loss: ${cur} ${netProfit.toFixed(0)}
+
+INVOICES:
+- Unpaid: ${unpaidInvoices.length} invoices worth ${cur} ${unpaidTotal.toFixed(0)}
+- Clients: ${unpaidInvoices.map(i => i.client).join(', ') || 'none'}
+
+STOCK:
+- Total items: ${stock.length}
+- Low stock (at/below threshold of ${threshold}): ${lowStock.length} items
+${lowStockList ? '- Items: ' + lowStockList : ''}
+
+RECORDS COUNT: ${income.length} income, ${expenses.length} expense, ${invoices.length} invoices, ${stock.length} stock items
+`.trim();
+}
+
+// ═══════════════════════════════════════════
+// UPDATE SIDEBAR STATS
+// ═══════════════════════════════════════════
+function updateSidebar() {
+  const { config, income, expenses, invoices, stock } = readData();
+  const cur = config.currency || 'KES';
+  const fmt = n => cur + ' ' + parseFloat(n || 0).toLocaleString('en-KE', { maximumFractionDigits: 0 });
+
+  const now = new Date();
+  const thisMonthStr = now.toISOString().slice(0, 7);
+  const isThisMonth = r => r.date && r.date.startsWith(thisMonthStr);
+
+  const monthInc = income.filter(isThisMonth).reduce((s, r) => s + parseFloat(r.amount || 0), 0);
+  const monthExp = expenses.filter(isThisMonth).reduce((s, r) => s + parseFloat(r.amount || 0), 0);
+  const monthProfit = monthInc - monthExp;
+  const threshold = parseInt(config.lowStockThreshold || 5);
+  const lowStockCount = stock.filter(s => parseInt(s.qty || 0) <= threshold).length;
+  const unpaidInv = invoices.filter(i => i.status === 'unpaid');
+  const unpaidTotal = unpaidInv.reduce((s, i) => s + parseFloat(i.total || 0), 0);
+
+  document.getElementById('s-income').textContent   = monthInc   ? fmt(monthInc)   : '—';
+  document.getElementById('s-expenses').textContent = monthExp   ? fmt(monthExp)   : '—';
+
+  const profEl = document.getElementById('s-profit');
+  profEl.textContent  = (monthInc || monthExp) ? fmt(monthProfit) : '—';
+  profEl.className    = 'stat-value ' + (monthProfit >= 0 ? 'pos' : 'neg');
+
+  document.getElementById('s-invoices').textContent = unpaidTotal ? fmt(unpaidTotal) + ' (' + unpaidInv.length + ')' : '—';
+  document.getElementById('s-stock').textContent    = lowStockCount ? lowStockCount + ' items' : '—';
+
+  const bizName = config.bizName || '';
+  if (bizName) document.getElementById('biz-label').textContent = bizName;
+}
+
+// ═══════════════════════════════════════════
+// OFFLINE FALLBACK — rule-based responses
+// ═══════════════════════════════════════════
+function offlineAnswer(question) {
+  const { config, income, expenses, invoices, stock } = readData();
+  const cur = config.currency || 'KES';
+  const fmt = n => cur + ' ' + parseFloat(n || 0).toLocaleString('en-KE', { maximumFractionDigits: 0 });
+  const q = question.toLowerCase();
+
+  const now = new Date();
+  const thisMonthStr = now.toISOString().slice(0, 7);
+  const isThisMonth = r => r.date && r.date.startsWith(thisMonthStr);
+
+  const monthInc = income.filter(isThisMonth).reduce((s, r) => s + parseFloat(r.amount || 0), 0);
+  const monthExp = expenses.filter(isThisMonth).reduce((s, r) => s + parseFloat(r.amount || 0), 0);
+  const monthProfit = monthInc - monthExp;
+  const margin = monthInc > 0 ? Math.round(monthProfit / monthInc * 100) : 0;
+  const threshold = parseInt(config.lowStockThreshold || 5);
+  const lowStock = stock.filter(s => parseInt(s.qty || 0) <= threshold);
+  const unpaidInv = invoices.filter(i => i.status === 'unpaid');
+  const unpaidTotal = unpaidInv.reduce((s, i) => s + parseFloat(i.total || 0), 0);
+
+  const expByCat = {};
+  expenses.filter(isThisMonth).forEach(e => {
+    expByCat[e.cat] = (expByCat[e.cat] || 0) + parseFloat(e.amount || 0);
+  });
+  const topExp = Object.entries(expByCat).sort((a, b) => b[1] - a[1]);
+
+  // Match question to response
+  if (q.includes('profit') || q.includes('profitable') || q.includes('making money')) {
+    if (!monthInc && !monthExp) return "No transactions recorded this month yet. Start by adding your income and expenses in the app.";
+    if (monthProfit > 0) return `Yes — you're profitable this month. Income is ${fmt(monthInc)}, expenses are ${fmt(monthExp)}, giving you a net profit of ${fmt(monthProfit)} (${margin}% margin). Action: keep expenses below ${fmt(monthInc * 0.6)} to stay healthy.`;
+    return `You're running at a loss this month. Income: ${fmt(monthInc)}, Expenses: ${fmt(monthExp)}, Loss: ${fmt(Math.abs(monthProfit))}. Action: identify which expense category is highest and look for ways to reduce it.`;
+  }
+
+  if (q.includes('expense') || q.includes('spending') || q.includes('cost') || q.includes('cut')) {
+    if (topExp.length === 0) return "No expenses recorded this month yet. Add your expenses in the Expenses section.";
+    const top3 = topExp.slice(0, 3).map(([c, v]) => `${c} (${fmt(v)})`).join(', ');
+    return `Your top expenses this month are: ${top3}. Total spending: ${fmt(monthExp)}. Action: review your #1 expense — ${topExp[0]?.[0] || 'unknown'} at ${fmt(topExp[0]?.[1] || 0)} — and see if any part of it can be reduced or negotiated.`;
+  }
+
+  if (q.includes('invoice') || q.includes('unpaid') || q.includes('owed') || q.includes('clients owe')) {
+    if (unpaidInv.length === 0) return "Great news — you have no unpaid invoices right now. All clients are settled.";
+    const clients = unpaidInv.map(i => i.client).join(', ');
+    return `You have ${unpaidInv.length} unpaid invoice${unpaidInv.length > 1 ? 's' : ''} worth ${fmt(unpaidTotal)}. Client${unpaidInv.length > 1 ? 's' : ''}: ${clients}. Action: send a payment reminder to the oldest unpaid invoice today — the longer you wait, the harder it gets to collect.`;
+  }
+
+  if (q.includes('stock') || q.includes('reorder') || q.includes('inventory') || q.includes('low')) {
+    if (lowStock.length === 0) return "All your stock items are above the reorder level. No urgent restocking needed.";
+    const items = lowStock.slice(0, 4).map(s => `${s.name} (${s.qty} ${s.unit || ''} left)`).join(', ');
+    return `You have ${lowStock.length} item${lowStock.length > 1 ? 's' : ''} running low: ${items}. Action: reorder ${lowStock[0]?.name || 'the first item'} urgently to avoid running out and losing sales.`;
+  }
+
+  if (q.includes('cash flow') || q.includes('next month') || q.includes('forecast')) {
+    const avg = monthInc > 0 ? monthInc : 0;
+    return `Based on this month, your income is ${fmt(monthInc)} and expenses are ${fmt(monthExp)}. ${monthProfit >= 0 ? `You have a buffer of ${fmt(monthProfit)} — try to keep this as a reserve.` : `You're spending more than you earn by ${fmt(Math.abs(monthProfit))} — urgent action needed to reduce costs or increase income.`} Action: aim to collect those unpaid invoices (${fmt(unpaidTotal)}) this week to improve your cash position.`;
+  }
+
+  if (q.includes('summary') || q.includes('overview') || q.includes('how am i doing') || q.includes('status')) {
+    const status = monthProfit >= 0 ? 'profitable' : 'running at a loss';
+    return `${config.bizName || 'Your business'} is currently ${status}. This month: income ${fmt(monthInc)}, expenses ${fmt(monthExp)}, net ${fmt(monthProfit)} (${margin}% margin). You have ${unpaidInv.length} unpaid invoice${unpaidInv.length !== 1 ? 's' : ''} worth ${fmt(unpaidTotal)} and ${lowStock.length} low stock alert${lowStock.length !== 1 ? 's' : ''}. Action: ${unpaidTotal > 0 ? 'chase your unpaid invoices first — that money is already earned.' : lowStock.length > 0 ? 'restock low items before you run out.' : 'keep monitoring your expense-to-income ratio.'}`;
+  }
+
+  if (q.includes('margin') || q.includes('percentage') || q.includes('%')) {
+    return `Your profit margin this month is ${margin}%. Income: ${fmt(monthInc)}, Profit: ${fmt(monthProfit)}. ${margin >= 30 ? 'That\'s a healthy margin — well done.' : margin >= 10 ? 'Margin is moderate. Look for ways to cut costs or raise prices slightly.' : 'Margin is thin. Focus on reducing your top expense category to improve it.'} Action: aim for at least a 25% margin consistently.`;
+  }
+
+  if (q.includes('income') || q.includes('revenue') || q.includes('sales') || q.includes('earning')) {
+    const incByCat = {};
+    income.filter(isThisMonth).forEach(i => { incByCat[i.cat] = (incByCat[i.cat] || 0) + parseFloat(i.amount || 0); });
+    const top = Object.entries(incByCat).sort((a, b) => b[1] - a[1]).slice(0, 3).map(([c, v]) => `${c}: ${fmt(v)}`).join(', ');
+    return `This month's income is ${fmt(monthInc)}. Top sources: ${top || 'no records yet'}. Action: focus on growing your #1 income source — it's your most proven revenue stream.`;
+  }
+
+  // Default
+  return `Based on your data: income this month is ${fmt(monthInc)}, expenses are ${fmt(monthExp)}, profit is ${fmt(monthProfit)}. You have ${unpaidInv.length} unpaid invoice${unpaidInv.length !== 1 ? 's' : ''} and ${lowStock.length} low stock alert${lowStock.length !== 1 ? 's' : ''}. Connect to the internet for a more detailed answer to your question.`;
+}
+
+// ═══════════════════════════════════════════
+// CHAT ENGINE
+// ═══════════════════════════════════════════
+const chatHistory = [];
+
+function addMsg(role, text, isOffline = false) {
+  chatHistory.push({ role, content: text });
+
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+
+  const wrap = document.getElementById('messages');
+  const div  = document.createElement('div');
+  div.className = 'msg ' + (role === 'user' ? 'user' : 'ai');
+
+  const av  = document.createElement('div');
+  av.className = 'avatar';
+  av.textContent = role === 'user' ? 'YOU' : 'AI';
+
+  const bub = document.createElement('div');
+  bub.className = 'bubble';
+  bub.textContent = text;
+
+  if (isOffline) {
+    const note = document.createElement('div');
+    note.className = 'offline-note';
+    note.textContent = '⚡ Offline mode — connect for full AI';
+    bub.appendChild(note);
+  }
+
+  div.appendChild(av);
+  div.appendChild(bub);
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function showTyping() {
+  const wrap = document.getElementById('messages');
+  const div  = document.createElement('div');
+  div.className = 'msg ai';
+  div.id = 'typing-indicator';
+  const av  = document.createElement('div');
+  av.className = 'avatar';
+  av.textContent = 'AI';
+  const bub = document.createElement('div');
+  bub.className = 'bubble';
+  bub.innerHTML = '<div class="typing-dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  div.appendChild(av);
+  div.appendChild(bub);
+  wrap.appendChild(div);
+  wrap.scrollTop = wrap.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+function ask(text) {
+  document.getElementById('userInput').value = text;
+  sendMsg();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMsg(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+async function sendMsg() {
+  const input = document.getElementById('userInput');
+  const btn   = document.getElementById('sendBtn');
+  const text  = input.value.trim();
+  if (!text) return;
+
+  addMsg('user', text);
+  input.value = '';
+  input.style.height = 'auto';
+  btn.disabled = true;
+  showTyping();
+
+  // ── OFFLINE MODE ──
+  if (!navigator.onLine) {
+    await new Promise(r => setTimeout(r, 600)); // feels natural
+    removeTyping();
+    const reply = offlineAnswer(text);
+    addMsg('assistant', reply, true);
+    btn.disabled = false;
+    input.focus();
+    return;
+  }
+
+  // ── ONLINE MODE — calls your secure backend ──
+  // After deploying to Render, replace the URL below with your actual Render URL
+  const BACKEND_URL = 'https://lkc-ai-backend.vercel.app/api/chat';
+
+  const systemPrompt = `You are a smart AI accounting assistant built into LKC Accounting — a professional accounting app for African businesses.
+
+Your job: analyze the user's real business data below and give SHORT, DIRECT, ACTIONABLE advice.
+
+Rules:
+- Keep replies under 140 words
+- Be specific — use actual figures from the data
+- Always end with ONE concrete action the owner should take today
+- Speak like a trusted advisor, not a chatbot
+- Use the local currency shown in the data
+- If data is missing or zero, acknowledge briefly and still give useful advice
+- Never mention Claude, Anthropic, or that you are an AI
+
+CURRENT BUSINESS DATA:
+${buildContext()}`;
+
+  try {
+    const res = await fetch(BACKEND_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system: systemPrompt,
+        messages: chatHistory.slice(-10)
+      })
+    });
+
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      console.error('Backend error:', res.status, errData);
+      throw new Error('Backend returned ' + res.status);
+    }
+
+    const data = await res.json();
+    removeTyping();
+    const reply = data.content?.find(b => b.type === 'text')?.text || 'Sorry, I could not get a response right now.';
+    addMsg('assistant', reply);
+  } catch (err) {
+    console.error('Request failed:', err);
+    removeTyping();
+    // Only show offline note if actually offline
+    const isOffline = !navigator.onLine;
+    const reply = offlineAnswer(text);
+    addMsg('assistant', reply, isOffline);
+  }
+
+  btn.disabled = false;
+  input.focus();
+}
+
+// ═══════════════════════════════════════════
+// ONLINE / OFFLINE STATUS
+// ═══════════════════════════════════════════
+function updateStatus() {
+  const badge  = document.getElementById('online-badge');
+  const banner = document.getElementById('offline-banner');
+  const hint   = document.getElementById('input-hint');
+  if (navigator.onLine) {
+    badge.textContent  = 'Online';
+    badge.className    = 'online-badge online';
+    banner.classList.remove('show');
+    hint.textContent   = 'Reads your LKC Accounting data automatically';
+  } else {
+    badge.textContent  = 'Offline';
+    badge.className    = 'online-badge offline';
+    banner.classList.add('show');
+    hint.textContent   = 'Offline mode active — basic answers available';
+  }
+}
+
+function goBack() {
+  if (window.history.length > 1) window.history.back();
+  else window.location.href = 'index.html';
+}
+
+// ═══════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════
+window.addEventListener('load', () => {
+  updateSidebar();
+  updateStatus();
+  window.addEventListener('online',  updateStatus);
+  window.addEventListener('offline', updateStatus);
+});
+</script>
+</body>
+</html>
